@@ -1,0 +1,30 @@
+{
+	"total_rows" : 2,
+	"offset" : 0,
+	"rows" : [{
+			"id" : "0a292aee-0569-4cd3-b7f9-f132c41f8b3c",
+			"key" : "0a292aee-0569-4cd3-b7f9-f132c41f8b3c",
+			"value" : {
+				"rev" : "4-3bfc54282c35c697d50cd263fdf19f6b"
+			},
+			"doc" : {
+				"path" : "/myactions/action2",
+				"code" : "function main(){ return { \"payload\":\"action2\"};}",
+				"_id" : "0a292aee-0569-4cd3-b7f9-f132c41f8b3c",
+				"_rev" : "4-3bfc54282c35c697d50cd263fdf19f6b"
+			}
+		}, {
+			"id" : "7329ae3f-0d3c-461e-955b-7a7109c6f934",
+			"key" : "7329ae3f-0d3c-461e-955b-7a7109c6f934",
+			"value" : {
+				"rev" : "2-13c255145dfbb4f77efa745f4b1a7106"
+			},
+			"doc" : {
+				"path" : "/myactions/action1",
+				"code" : "function main(){ return { \"payload\":\"action1\"};}",
+				"_id" : "7329ae3f-0d3c-461e-955b-7a7109c6f934",
+				"_rev" : "2-13c255145dfbb4f77efa745f4b1a7106"
+			}
+		}
+	]
+}

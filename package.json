@@ -1,0 +1,15 @@
+{
+  "name": "node-dash",
+  "version": "0.0.1",
+  "description": "Serverless system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hans Klunder",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "nano": "^6.2.0",
+    "pouchdb-server": "^1.2.0"
+  }
+}
