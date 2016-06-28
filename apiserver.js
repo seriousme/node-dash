@@ -6,6 +6,7 @@ var express = require('express')
    , app     = express()
    ;
    
+
 function handleResult(res){
 	return function(error, body, headers) {
 		if (error) {
@@ -16,6 +17,7 @@ function handleResult(res){
 		res.send(body);
 	}
 }
+
 
 app.get('/actions', function (req, res) {
   actions.list({include_docs:true}, handleResult(res));
@@ -33,13 +35,24 @@ app.get('/', function (req, res) {
   res.send('Api server ready');
 });
 
+// handle requests for execution of an action
 app.get('/*', function (req, res) {
-	var record = {
-		"path": req.path,
-		"status": "new",
-		"params": req.query
-	};
-  requests.insert(record,handleResult(res))
+	// check if the action exists in the DB
+	actions.head(req.path,function (error,body,headers){
+		if (error){
+			res.status(404);
+			return res.send("No such action");
+		}
+		// store request in the database
+		var record = {
+			"path": req.path,
+			"status": "new",
+			"params": req.query
+		};
+		// async request, return the requestID so user can use /requests/:requestid to pickup the result
+		requests.insert(record,handleResult(res));
+		// TODO: for synchronous requests we need to return the result of the action
+	});	
 });
 
 
