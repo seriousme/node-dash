@@ -22,35 +22,44 @@ function bulkInsert(dbname,data){
 }
 
 bulkInsert("actions",[{
-		"_id" : "/myactions/action1",
-		"code" : "function main(){ return { \"payload\":\"action1\"};}"
+		"_id" : "/myactions/sum",
+		"code" : "function main(params){ return { \"sum\": params.a + params.b};}"
 	}, {
-		"_id" : "/myactions/action2",
-		"code" : "function main(){ return { \"payload\":\"action2\"};}"
+		"_id" : "/myactions/mult",
+		"code" : "function main(params){ return { \"mult\":params.a * params.b};}"
 	}
 ]);
 
 bulkInsert("requests",[
 	{
-		"path" : "/myactions/action2",
+		"path" : "/myactions/sum",
 		"params" : {
 			"a" : 1,
 			"b" : 2
 		},
 		"result" : {
-			"payload" : "action2"
+			"sum" : "3"
 		},
 		"status" : "success",
 		"_id" : "00aab0e9-fedb-4a60-92a2-972646576ada"
 	},
 	{
-		"path" : "/myactions/action1",
+		"path" : "/myactions/sum",
 		"params" : {
 			"a" : 1,
 			"b" : 2
 		},
 		"status" : "new",
 		"_id" : "15e0dcbc-a518-4c46-8716-1c39dde93df4"
+	}, 
+	{
+		"path" : "/myactions/mult",
+		"params" : {
+			"a" : 1,
+			"b" : 2
+		},
+		"status" : "new",
+		"_id" : "a6b76660-0e57-4ee2-a200-8df1b1dce5f3"
 	}, 
 	{
 		"views" : {

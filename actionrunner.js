@@ -2,8 +2,8 @@ var nano    = require('nano')('http://localhost:5984')
    , actions = nano.use("actions")
    , requests = nano.use("requests");
    
- 
  function processAction(action,request){
+	 console.log("processing",request._id);
 	 var actionOk = false;
 	 try {
 		 // instantiate the action
@@ -34,28 +34,44 @@ var nano    = require('nano')('http://localhost:5984')
  }
  
  // process the request
- function processRequest(err,body){
+ function processRequest(err,request){
 	if (! err){
-		actions.get(body.path, getActionHandler(body));
+		request.status = "processing";
+		// update the request status to ensure we are the only one processing this request
+		requests.insert(request, function(err2,body){
+			if (! err2){
+				// update the request rev so we can update the request later on
+				request._rev = body.rev;
+				console.log("starting", request._id);
+				actions.get(request.path, getActionHandler(request));
+			}
+		});
 	}
  }
  
- // get a request from the queue
- function getRequest(err,body){
-	 if (! err){
-		if (body.total_rows > 0){
-			requests.get(body.rows[0].id, processRequest);		
-		}
-	 }
+ 
+// fetch a request from queue
+function processQueue(){
+	 requests.view('requests','new',{ limit:1 }, function(err,body){
+		 if (! err){
+			 if (body.total_rows > 0){
+				 console.log("trying to start", body.rows[0].id);
+				 requests.get(body.rows[0].id, processRequest);
+			 }
+		 }
+	 });
  }
  
+ function startProcessing(){
+	timer=setInterval(processQueue,500);
+ }
  
+ function stopProcessing(){
+	 //clearInterval(timer);
+ }
  
- // main loop
- //while(true){
-	 // fetch a request from queue
-	 requests.view('requests','new',{ limit:1 }, getRequest);
- //}
+ startProcessing();
+ 
 
  
    
