@@ -38,11 +38,8 @@ function returnSyncResult(res,id,type){
 		res.status(504); // timeout
 		return res.send("request timed out");
 	}
-	requests.get(id, function(err,result){
-		// return the result
-		res.status(200);
-		res.send(result);
-	});
+  // return result
+	requests.get(id, handleResult(res));
 }
 
 // for synchronous requests we need to return the result of the action
