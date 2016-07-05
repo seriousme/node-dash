@@ -12,17 +12,24 @@ var maxTime = 2000; // time in ms before timing out sync requests
 var changeInterval = 200; // interval in ms to look for changes
 var lastSeq = 0;
    
-// async request, return the requestID so user can use /requests/:requestid to pickup the result
-function handleAsync(res){
+
+function handleResult(res,status){
+	var statusCode = status || 200;
 	return function(error, body) {
 		if (error) {
 			res.status(error.statusCode);
 			return res.send(error.message);
 		}
-		res.status(201); // request created
+		res.status(status); // request created
 		res.send(body);
 	}
 }
+
+// async request, return the requestID so user can use /requests/:requestid to pickup the result
+function handleAsync(res){
+	return handleResult(res,201);
+}
+
 
 function returnSyncResult(res,id,type){
 	if (type == "timeout"){
