@@ -23,10 +23,10 @@ function bulkInsert(dbname,data){
 
 bulkInsert("actions",[{
 		"_id" : "/myactions/sum",
-		"code" : "function main(params){ return { \"sum\": params.a + params.b};}"
+		"code" : "function main(params){ return { \"sum\": Number(params.a) + Number(params.b)};}"
 	}, {
 		"_id" : "/myactions/mult",
-		"code" : "function main(params){ return { \"mult\":params.a * params.b};}"
+		"code" : "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}"
 	}
 ]);
 
