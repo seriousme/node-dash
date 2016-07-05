@@ -1,17 +1,19 @@
 
+var DbUrl= process.env.DB_URL || 'http://localhost:5984';
+
 var eventEmitter = require('events'),
-    evt = new eventEmitter,
-	express = require('express')
-   , nano    = require('nano')('http://localhost:5984')
-   , actions = nano.use("actions")
-   , requests = nano.use("requests")
-   , app     = express()
+   evt = new eventEmitter(),
+	 express = require('express'),
+   nano    = require('nano')(DbUrl),
+   actions = nano.use("actions"),
+   requests = nano.use("requests"),
+   app     = express()
    ;
 
 var maxTime = 2000; // time in ms before timing out sync requests
 var changeInterval = 200; // interval in ms to look for changes
 var lastSeq = 0;
-   
+
 
 function handleResult(res,status){
 	var statusCode = status || 200;
@@ -56,7 +58,7 @@ function handleSync(res){
 			returnSyncResult(res,body.id,type);
 		});
 		// if it takes longer than maxTime, return a timeout
-		setTimeout(function(){ 
+		setTimeout(function(){
 			evt.emit(body.id,"timeout");
 			},
 		maxTime
@@ -68,6 +70,9 @@ function handleSync(res){
 function handleRequestsChanges(){
 	requests.changes( { since:lastSeq, include_docs:true },
 		function (err,body){
+      if (error){
+  			return;
+  		}
 			if ( lastSeq != body.last_seq){
 				body.results.forEach(function (item){
 					var status = item.doc.status;
@@ -111,15 +116,15 @@ app.get('/*', function (req, res) {
 			"status": "new",
 			"params": req.query
 		};
-		
+
 		var handler = handleAsync(res);
-		
+
 		if (typeof(req.query.sync) !== 'undefined'){
 			handler = handleSync(res);
 		}
-		
+
 		requests.insert(record,handler);
-	});	
+	});
 });
 
 setInterval(handleRequestsChanges,changeInterval);

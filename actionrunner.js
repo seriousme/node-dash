@@ -1,7 +1,10 @@
-var nano    = require('nano')('http://localhost:5984')
+
+var DbUrl= process.env.DB_URL || 'http://localhost:5984';
+
+var nano    = require('nano')(DbUrl)
    , actions = nano.use("actions")
    , requests = nano.use("requests");
-   
+
  function processAction(action,request){
 	 console.log("processing",request._id);
 	 var actionOk = false;
@@ -11,7 +14,7 @@ var nano    = require('nano')('http://localhost:5984')
 		 actionOk = true;
 		 // execute the action
 		 request.result = eval(main(request.params));
-		 request.status = "success"; 
+		 request.status = "success";
 	 }
 	 catch(err){
 		 if (! actionOk){
@@ -25,14 +28,14 @@ var nano    = require('nano')('http://localhost:5984')
 	 // and update the repository
 	 requests.insert(request);
  }
- 
+
  // return a handler which will process action and request
  function getActionHandler(request){
 	 return function(err,action){
 		 processAction(action,request);
 	 }
  }
- 
+
  // process the request
  function processRequest(err,request){
 	if (! err){
@@ -48,8 +51,8 @@ var nano    = require('nano')('http://localhost:5984')
 		});
 	}
  }
- 
- 
+
+
 // fetch a request from queue
 function processQueue(){
 	 requests.view('requests','new',{ limit:1 }, function(err,body){
@@ -61,17 +64,13 @@ function processQueue(){
 		 }
 	 });
  }
- 
+
  function startProcessing(){
 	timer=setInterval(processQueue,500);
  }
- 
+
  function stopProcessing(){
 	 //clearInterval(timer);
  }
- 
- startProcessing();
- 
 
- 
-   
+ startProcessing();
