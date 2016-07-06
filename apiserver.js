@@ -14,22 +14,37 @@ var maxTime = 2000; // time in ms before timing out sync requests
 var changeInterval = 200; // interval in ms to look for changes
 var lastSeq = 0;
 
+function dummy(res,txt){
+	res.status(200); // request created
+	res.send(txt);
+}
+
+
+function filterObject(obj,accepted) {
+    var result = {};
+    accepted.forEach( function(item){ 
+		if ( typeof(obj[item]) != "undefined"){
+			result[item];
+		}
+	});
+    return result;
+}
 
 function handleResult(res,status){
 	var statusCode = status || 200;
-	return function(error, body) {
-		if (error) {
-			res.status(error.statusCode);
-			return res.send(error.message);
+	return function(err, body) {
+		if (err) {
+			res.status(err.statusCode);
+			return res.send(err.message);
 		}
-		res.status(status); // request created
+		res.status(statusCode); 
 		res.send(body);
 	}
 }
 
 // async request, return the requestID so user can use /requests/:requestid to pickup the result
 function handleAsync(res){
-	return handleResult(res,201);
+	return handleResult(res,201); // request created
 }
 
 
@@ -67,9 +82,9 @@ function handleSync(res){
 function handleRequestsChanges(){
 	requests.changes( { since:lastSeq, include_docs:true },
 		function (err,body){
-      if (error){
-  			return;
-  		}
+			if (err){
+				return;
+			}
 			if ( lastSeq != body.last_seq){
 				body.results.forEach(function (item){
 					var status = item.doc.status;
@@ -83,21 +98,52 @@ function handleRequestsChanges(){
 	);
 }
 
-app.get('/actions', function (req, res) {
+// the actions
+
+// list actions
+app.get('/dash/actions', function (req, res) {
   actions.list({include_docs:true}, handleResult(res));
 });
 
-app.get('/requests', function (req, res) {
+// get info on an action
+app.get('/dash/actions/:tag', function (req, res) {
+  dummy(res,"get info on an action"+req.params.tag);
+});
+// create a new action
+app.post('/dash/actions/:tag', function (req, res) {
+  //actions.list({include_docs:true}, handleResult(res));
+  dummy(res,"create new action"+req.params.tag);
+});
+
+// update an existing action
+app.put('/dash/actions/:tag', function (req, res) {
+  //actions.list({include_docs:true}, handleResult(res));
+  dummy(res,"update action"+req.params.tag);
+});
+
+// remove an action
+app.delete('/dash/actions/:tag', function (req, res) {
+  //actions.list({include_docs:true}, handleResult(res));
+  dummy(res,"delete action"+req.params.tag);
+});
+
+// the requests
+
+// list all requests
+app.get('/dash/requests', function (req, res) {
   requests.view('requests','all', handleResult(res));
 });
 
-app.get('/requests/:requestid', function (req, res) {
+// get a specific request
+app.get('/dash/requests/:requestid', function (req, res) {
   requests.get(req.params.requestid, handleResult(res));
 });
 
+// root path
 app.get('/', function (req, res) {
   res.send('Api server ready');
 });
+
 
 // handle requests for execution of an action
 app.get('/*', function (req, res) {

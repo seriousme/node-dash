@@ -1,0 +1,186 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "0.0.1",
+        "title": "Dash"
+    },
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/actions": {
+            "get": {
+                "description": "List all 'actions'\n",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "ArrayOfActions",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReturnedAction"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/actions/{tag}": {
+            "post": {
+                "description": "Create an `action`\n",
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "path",
+                        "description": "an action tag",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "action",
+                        "in": "body",
+                        "description": "an action object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Action"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ReturnedAction"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an `action`\n",
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "path",
+                        "description": "an action tag",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "action",
+                        "in": "body",
+                        "description": "an action object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Action"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ReturnedAction"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove an `action`\n",
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "path",
+                        "description": "an action tag",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/requests": {
+            "get": {
+                "description": "List all 'requests'\n",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "title": "ArrayOfRequests",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Request"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/{id}": {
+            "get": {
+                "description": "Get a single'requests'\n",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the request to retrieve",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Action": {
+            "type": "object",
+            "required": [
+                "actionCode"
+            ],
+            "properties": {
+                "actionCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnedAction": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
+                "rev": {
+                    "type": "string"
+                }
+            }
+        },
+        "Request": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
