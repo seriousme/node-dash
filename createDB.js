@@ -1,4 +1,5 @@
-var nano    = require('nano')('http://localhost:5984');
+var DbUrl= process.env.DB_URL || 'http://localhost:5984';
+var nano    = require('nano')(DbUrl);
 
 
 function bulkInsert(dbname,data){
