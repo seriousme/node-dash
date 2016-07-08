@@ -1,9 +1,10 @@
 
 var DbUrl= process.env.DB_URL || 'http://localhost:5984';
+var ApiPort= process.env.API_PORT || 8080;
 
 var eventEmitter = require('events'),
    evt = new eventEmitter(),
-	 express = require('express'),
+   express = require('express'),
    nano    = require('nano')(DbUrl),
    actions = nano.use("actions"),
    requests = nano.use("requests"),
@@ -172,6 +173,6 @@ app.get('/*', function (req, res) {
 
 setInterval(handleRequestsChanges,changeInterval);
 
-app.listen(3000, function () {
-  console.log('Api server listening on port 3000!');
+app.listen(ApiPort, function () {
+  console.log('Api server listening on port', ApiPort);
 });
