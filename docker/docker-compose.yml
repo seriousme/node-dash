@@ -1,0 +1,28 @@
+version: '2'
+# a docker compose file to split chahasy up in three containers
+# - the core MQTT server
+# - the HTTP server serving the UI and the websockets bridge
+# - the rules engine
+# due to bug in docker dns is case sensitive https://github.com/docker/libnetwork/issues/993
+services:
+  actionrunner:
+    image: seriousme/dash
+    environment:
+     - DB_URL=http://pouchdb:5984/
+    links:
+     - pouchdb
+    entrypoint: /usr/bin/node /usr/src/app/actionrunner.js 
+  apiserver:
+    image: seriousme/dash
+    environment: 
+     - DB_URL=http://pouchdb:5984/
+    ports:
+     - "8080:8080"
+    links:
+     - pouchdb
+    entrypoint: /usr/bin/node /usr/src/app/apiserver.js 
+  pouchdb:
+    image: seriousme/dash
+    ports: 
+    - "5984:5984"
+    entrypoint: /bin/sh /usr/src/app/docker/startdb.sh
