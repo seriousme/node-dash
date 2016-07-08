@@ -6,14 +6,14 @@ version: '2'
 # due to bug in docker dns is case sensitive https://github.com/docker/libnetwork/issues/993
 services:
   actionrunner:
-    image: seriousme/dash
+    image: seriousme/node-dash
     environment:
      - DB_URL=http://pouchdb:5984/
     links:
      - pouchdb
     entrypoint: /usr/bin/node /usr/src/app/actionrunner.js 
   apiserver:
-    image: seriousme/dash
+    image: seriousme/node-dash
     environment: 
      - DB_URL=http://pouchdb:5984/
     ports:
@@ -22,7 +22,7 @@ services:
      - pouchdb
     entrypoint: /usr/bin/node /usr/src/app/apiserver.js 
   pouchdb:
-    image: seriousme/dash
+    image: seriousme/node-dash
     ports: 
     - "5984:5984"
     entrypoint: /bin/sh /usr/src/app/docker/startdb.sh
