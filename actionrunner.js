@@ -1,11 +1,12 @@
 
-var DbUrl= process.env.DB_URL || 'http://localhost:5984';
+const DbUrl= process.env.DB_URL || 'http://localhost:5984';
 
-var nano    = require('nano')(DbUrl)
-   , actions = nano.use("actions")
-   , requests = nano.use("requests");
+const nano    = require('nano')(DbUrl),
+      actions = nano.use("actions"),
+      requests = nano.use("requests");
 
- function processAction(action,request){
+
+function processAction(action,request){
 	 console.log("processing",request._id);
 	 var actionOk = false;
 	 try {
@@ -33,7 +34,7 @@ var nano    = require('nano')(DbUrl)
  function getActionHandler(request){
 	 return function(err,action){
 		 processAction(action,request);
-	 }
+	 };
  }
 
  // process the request
@@ -41,7 +42,7 @@ var nano    = require('nano')(DbUrl)
 	if (! err){
 		request.status = "processing";
 		// update the request status to ensure we are the only one processing this request
-		requests.insert(request, function(err2,body){
+		requests.insert(request, (err2,body)=>{
 			if (! err2){
 				// update the request rev so we can update the request later on
 				request._rev = body.rev;
@@ -55,7 +56,7 @@ var nano    = require('nano')(DbUrl)
 
 // fetch a request from queue
 function processQueue(){
-	 requests.view('requests','new',{ limit:1 }, function(err,body){
+	 requests.view('requests','new',{ limit:1 }, (err,body)=>{
 		 if (! err){
 			 if (body.total_rows > 0){
 				 console.log("trying to start", body.rows[0].id);
@@ -66,11 +67,8 @@ function processQueue(){
  }
 
  function startProcessing(){
-	timer=setInterval(processQueue,500);
- }
-
- function stopProcessing(){
-	 //clearInterval(timer);
+	  const timer=setInterval(processQueue,500);
+    return timer;
  }
 
  startProcessing();
