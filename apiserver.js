@@ -1,8 +1,8 @@
 
-var DbUrl= process.env.DB_URL || 'http://localhost:5984';
-var ApiPort= process.env.API_PORT || 8080;
+const DbUrl= process.env.DB_URL || 'http://localhost:5984';
+const ApiPort= process.env.API_PORT || 8080;
 
-var eventEmitter = require('events'),
+const eventEmitter = require('events'),
    evt = new eventEmitter(),
    express = require('express'),
    nano    = require('nano')(DbUrl),
@@ -11,25 +11,13 @@ var eventEmitter = require('events'),
    app     = express()
    ;
 
-var maxTime = 2000; // time in ms before timing out sync requests
-var changeInterval = 200; // interval in ms to look for changes
+const maxTime = 2000; // time in ms before timing out sync requests
+const changeInterval = 200; // interval in ms to look for changes
 var lastSeq = 0;
 
-function dummy(res,txt){
-	res.status(200); // request created
-	res.send(txt);
-}
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // for parsing application/json
 
-
-function filterObject(obj,accepted) {
-    var result = {};
-    accepted.forEach( function(item){ 
-		if ( typeof(obj[item]) != "undefined"){
-			result[item];
-		}
-	});
-    return result;
-}
 
 function handleResult(res,status){
 	var statusCode = status || 200;
@@ -38,9 +26,9 @@ function handleResult(res,status){
 			res.status(err.statusCode);
 			return res.send(err.message);
 		}
-		res.status(statusCode); 
+		res.status(statusCode);
 		res.send(body);
-	}
+	};
 }
 
 // async request, return the requestID so user can use /requests/:requestid to pickup the result
@@ -61,34 +49,32 @@ function returnSyncResult(res,id,type){
 // for synchronous requests we need to return the result of the action
 function handleSync(res){
 	return function(error, body) {
-		var timer;
 		if (error) {
 			res.status(error.statusCode);
 			return res.send(error.message);
 		}
 		// wait for an event to pickup the result from the queue and return it to the requester
-		evt.once(body.id, function(type){
+		evt.once(body.id, (type) => {
 			returnSyncResult(res,body.id,type);
 		});
 		// if it takes longer than maxTime, return a timeout
-		setTimeout(function(){
-			evt.emit(body.id,"timeout");
-			},
-		maxTime
-		);
-	}
+		setTimeout(()=>{
+  			evt.emit(body.id,"timeout");
+  			},
+		    maxTime);
+	};
 }
 
 // pouchDB seems to have a problem with streaming changes and with filtering changes, so we poll on a regular basis and filter here
 function handleRequestsChanges(){
 	requests.changes( { since:lastSeq, include_docs:true },
-		function (err,body){
+		(err,body)=>{
 			if (err){
 				return;
 			}
 			if ( lastSeq != body.last_seq){
-				body.results.forEach(function (item){
-					var status = item.doc.status;
+				body.results.forEach((item)=>{
+					const status = item.doc.status;
 					if (( status != "new" ) && (status != "processing")){
 						evt.emit(item.id);
 					}
@@ -99,33 +85,29 @@ function handleRequestsChanges(){
 	);
 }
 
+
+
+
 // the actions
 
 // list actions
-app.get('/dash/actions', function (req, res) {
+app.get('/dash/actions',  (req, res) => {
   actions.list({include_docs:true}, handleResult(res));
 });
 
 // get info on an action
-app.get('/dash/actions/:tag', function (req, res) {
-  dummy(res,"get info on an action"+req.params.tag);
-});
-// create a new action
-app.post('/dash/actions/:tag', function (req, res) {
-  //actions.list({include_docs:true}, handleResult(res));
-  dummy(res,"create new action"+req.params.tag);
+app.get('/dash/actions/:id', (req, res) => {
+  actions.get(req.params.id, handleResult(res));
 });
 
-// update an existing action
-app.put('/dash/actions/:tag', function (req, res) {
-  //actions.list({include_docs:true}, handleResult(res));
-  dummy(res,"update action"+req.params.tag);
+// create a new action or update an existing action
+app.put('/dash/actions/:id', (req, res) => {
+  actions.insert(req.body, req.params.id, handleResult(res));
 });
 
 // remove an action
-app.delete('/dash/actions/:tag', function (req, res) {
-  //actions.list({include_docs:true}, handleResult(res));
-  dummy(res,"delete action"+req.params.tag);
+app.delete('/dash/actions/:id', function (req, res) {
+  actions.destroy(req.params.id,req.params.rev, handleResult(res));
 });
 
 // the requests
