@@ -17,6 +17,7 @@ var lastSeq = 0;
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // for parsing application/json
+app.use('/dash/ui', express.static('public'));
 
 
 function handleResult(res,status){
@@ -124,7 +125,7 @@ app.get('/dash/requests/:requestid', function (req, res) {
 
 // root path
 app.get('/', function (req, res) {
-  res.send('Api server ready');
+  res.redirect('/dash/ui');
 });
 
 
