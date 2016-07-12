@@ -30,7 +30,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Dash</a>
+                <a class="navbar-brand" style="color:lightblue" href="#">Dash</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -65,7 +65,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="request in requests" v-on:click="showRequest(request)">
+                                <tr v-for="request in requests" v-on:click="showRequest(request)" style="color:blue;cursor:pointer">
                                     <td>{{ request._id }}</td>
                                     <td>{{ request.path }}</td>
                                     <td>{{ request.status }}</td>
@@ -73,6 +73,7 @@
                             </tbody>
                         </table>
                     </div>
+		<button type="button" class="btn btn-sm btn-default">New Request</button>
                 </div>
             </div>
         </template>
@@ -90,12 +91,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="action in actions" v-on:click="showAction(action)">
+                                <tr v-for="action in actions" v-on:click="showAction(action)" style="color:blue;cursor:pointer">
                                     <td>{{ action._id }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+		    <button type="button" class="btn btn-sm btn-default" v-on:click="newAction">New action</button>
                 </div>
             </div>
         </template>
@@ -108,12 +110,12 @@
                     <form role="form">
                         <div class="form-group">
                             <label>Path</label>
-                            <input class="form-control" placeholder="e.g. /myactions/min" value="{{ action._id }}" disabled>
+                            <input class="form-control" placeholder="/myactions/min" value="{{ action._id }}" v-text:"disabled:exists(action._rev)">
                         </div>
 
                         <div class="form-group">
                             <label>Code</label>
-                            <textarea class="form-control" rows="10">{{ action.code }}</textarea>
+                            <textarea class="form-control" rows="10" placeholder="main(params){ return params.a }">{{ action.code }}</textarea>
                         </div>
                         <div class="form-group" v-show="exists(action._rev)">
                             <label>Revision</label>
@@ -122,7 +124,7 @@
                         <p>
                             <button type="button" class="btn btn-primary">Save</button>
                             <button type="button" class="btn btn-warning" v-on:click="listActions">Cancel</button>
-                            <button type="button" class="btn btn-danger">Delete</button>
+                            <button type="button" class="btn btn-danger" v-show="exists(action._rev)">Delete</button>
                         </p>
                     </form>
                 </div>

@@ -36,7 +36,8 @@ var app = new Vue({
             console.log("Fetching events");
             var actions = [{
                 "_id": "/myactions/sum",
-                "code": "function main(params){ return { \"sum\": Number(params.a) + Number(params.b)};}"
+                "code": "function main(params){ return { \"sum\": Number(params.a) + Number(params.b)};}",
+		"_rev": "20aab0e9-fedb-4a60-92a2-972646576acd"
             }, {
                 "_id": "/myactions/mult",
                 "code": "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}",
@@ -79,6 +80,10 @@ var app = new Vue({
             this.$set('requests', requests);
         },
 
+	newAction: function(action) {
+          this.$set('action',{_id:"",code:""} );
+          this.$set('page', 'action');
+        },
         showAction: function(action) {
           this.$set('action',action );
           this.$set('page', 'action');
@@ -139,3 +144,4 @@ if (typeof pages[location.hash] != 'undefined'){
 }
 
 setPage(startPage);
+
