@@ -35,10 +35,10 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li v-bind:class="{ 'active':(currentPage == 'requests') }">
+                    <li v-bind:class="{ 'active':(hash == 'requests') }">
                         <a href="#requests">Requests</a>
                     </li>
-                    <li v-bind:class="{ 'active':(currentPage == 'actions') }">
+                    <li v-bind:class="{ 'active':(hash == 'actions') }">
                         <a href="#actions">Actions</a>
                     </li>
                     <li>
@@ -51,10 +51,10 @@
     </nav>
     <!-- requests list -->
     <div class="container">
-        <template v-if="(currentPage == 'requests')">
+        <template v-if="(page == 'requests')">
             <div class="row">
                 <div class="col-lg-6">
-                    <h2>Requests</h2>
+                    <h3>Requests</h3>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -65,7 +65,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="request in requests">
+                                <tr v-for="request in requests" v-on:click="showRequest(request)">
                                     <td>{{ request._id }}</td>
                                     <td>{{ request.path }}</td>
                                     <td>{{ request.status }}</td>
@@ -78,10 +78,10 @@
         </template>
         <!-- actions list -->
 
-        <template v-if="(currentPage == 'actions')">
+        <template v-if="(page == 'actions')">
             <div class="row">
                 <div class="col-lg-6">
-                    <h2>Actions</h2>
+                    <h3>Actions</h3>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -90,12 +90,58 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="action in actions">
+                                <tr v-for="action in actions" v-on:click="showAction(action)">
                                     <td>{{ action._id }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- actions item -->
+        <template v-if="(page == 'action')">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3 v-on:click="listActions">Actions>Action</h3>
+                    <form role="form">
+                        <div class="form-group">
+                            <label>Path</label>
+                            <input class="form-control" placeholder="e.g. /myactions/min" value="{{ action._id }}" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Code</label>
+                            <textarea class="form-control" rows="10">{{ action.code }}</textarea>
+                        </div>
+                        <div class="form-group" v-show="exists(action._rev)">
+                            <label>Revision</label>
+                            <input class="form-control" value="{{ action._rev }}" disabled>
+                        </div>
+                        <p>
+                            <button type="button" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-warning" v-on:click="listActions">Cancel</button>
+                            <button type="button" class="btn btn-danger">Delete</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </template>
+        <!-- requests item -->
+        <template v-if="(page == 'request')">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3 v-on:click="listRequests">Requests>Request</h3>
+                    <form role="form">
+                        <div class="form-group">
+                            <label>Request</label>
+                            <textarea class="form-control" rows="10">{{ toJson(request) }}</textarea>
+                        </div>
+                        <p>
+                            <button type="button" class="btn btn-primary" v-on:click="listRequests">Back</button>
+                        </p>
+                    </form>
                 </div>
             </div>
         </template>

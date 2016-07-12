@@ -1,10 +1,8 @@
 // app.js
 
 const pages = {
-  "#requests" : "requests",
-  "#actions" : "actions",
-  "#request/" : "request",
-  "#action/" : "action",
+  "#requests" : { "page": "requests","hash":"requests" },
+  "#actions"  : { "page": "actions","hash":"actions" }
 };
 
 var app = new Vue({
@@ -19,7 +17,8 @@ var app = new Vue({
         request: {},
         actions: [],
         requests: [],
-        currentPage: ""
+        page: "",
+        hash: ""
     },
 
     // Anything within the ready function will run when the application loads
@@ -40,7 +39,8 @@ var app = new Vue({
                 "code": "function main(params){ return { \"sum\": Number(params.a) + Number(params.b)};}"
             }, {
                 "_id": "/myactions/mult",
-                "code": "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}"
+                "code": "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}",
+                "_rev": "00aab0e9-fedb-4a60-92a2-972646576ada"
             }];
             var requests = [{
                     "path": "/myactions/sum",
@@ -79,7 +79,24 @@ var app = new Vue({
             this.$set('requests', requests);
         },
 
-        // Adds an event to the existing events array
+        showAction: function(action) {
+          this.$set('action',action );
+          this.$set('page', 'action');
+        },
+        showRequest: function(request) {
+          this.$set('request',request );
+          this.$set('page', 'request');
+        },
+        listActions: function() {
+          this.$set('page', 'actions');
+        },
+        listRequests: function() {
+          this.$set('page', 'requests');
+        },
+        toJson:function(obj){
+          return JSON.stringify(obj,null,2);
+        },
+        // Adds an action to the existing actions array
         addAction: function() {
             console.log("Add action");
             if (this.action.path) {
@@ -96,13 +113,18 @@ var app = new Vue({
                 // $remove is a Vue convenience method similar to splice
                 this.actions.$remove(action);
             }
-        }
+        },
+       exists: function(v){
+         return (typeof(v)!= "undefined");
+       }
     }
 });
 
+
 //
 function setPage(url){
-    app.currentPage = pages[url];
+    app.page = pages[url].page;
+    app.hash = pages[url].hash;
 }
 
 window.onhashchange = function(){
