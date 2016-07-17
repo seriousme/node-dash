@@ -1,10 +1,12 @@
 
 const DbUrl= process.env.DB_URL || 'http://localhost:5984';
 const ApiPort= process.env.API_PORT || 8080;
+const staticDir= 'public';
 
 const eventEmitter = require('events'),
    evt = new eventEmitter(),
    express = require('express'),
+   join = require('path').join,
    nano    = require('nano')(DbUrl),
    actions = nano.use("actions"),
    requests = nano.use("requests"),
@@ -17,7 +19,7 @@ var lastSeq = 0;
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // for parsing application/json
-app.use('/dash/ui', express.static('public'));
+app.use('/dash/ui', express.static(staticDir));
 
 
 function handleResult(res,status){
@@ -121,6 +123,10 @@ app.get('/dash/requests', function (req, res) {
 // get a specific request
 app.get('/dash/requests/:requestid', function (req, res) {
   requests.get(req.params.requestid, handleResult(res));
+});
+
+app.get('/dash/ui/*', function (req, res) {
+  res.sendFile(join(__dirname,staticDir,'/index.html'));
 });
 
 // root path
