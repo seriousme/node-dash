@@ -1,17 +1,8 @@
 // app.js
 
-var pages = {
-    "#requests": {
-        "page": "listRequests",
-        "hash": "requests"
-    },
-    "#actions": {
-        "page": "listActions",
-        "hash": "actions"
-    }
-};
 
 var startPage = "#requests";
+var baseUrl = "/dash/";
 
 Vue.filter('since', function(timestamp) {
     return (dateSince(Number(timestamp)) + " ago");
@@ -38,64 +29,13 @@ var app = new Vue({
     ready: function() {
         // When the application loads, we want to call the method that initializes
         // some data
-        this.fetchData();
+        //this.fetchData();
     },
 
     // Methods we want to use in our application are registered here
     methods: {
 
         // We dedicate a method to retrieving and setting some data
-        fetchData: function() {
-            var now = Date.now();
-            var actions = [{
-                "_id": "/myactions/sum",
-                "code": "function main(params){ return { \"sum\": Number(params.a) + Number(params.b)};}",
-                "_rev": "20aab0e9-fedb-4a60-92a2-972646576acd"
-            }, {
-                "_id": "/myactions/mult",
-                "code": "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}",
-                "_rev": "00aab0e9-fedb-4a60-92a2-972646576ada"
-            }];
-            var requests = [{
-                    "path": "/myactions/sum",
-                    "timestamp": (now - 8000000),
-                    "params": {
-                        "a": 1,
-                        "b": 2
-                    },
-                    "result": {
-                        "sum": "3"
-                    },
-                    "status": "success",
-                    "_id": "00aab0e9-fedb-4a60-92a2-972646576ada"
-                }, {
-                    "path": "/myactions/sum",
-                    "timestamp": (now - 320000),
-                    "params": {
-                        "a": 1,
-                        "b": 2
-                    },
-                    "status": "new",
-                    "_id": "15e0dcbc-a518-4c46-8716-1c39dde93df4"
-                }, {
-                    "path": "/myactions/mult",
-                    "timestamp": (now - 140000),
-                    "params": {
-                        "a": 1,
-                        "b": 2
-                    },
-                    "status": "new",
-                    "_id": "a6b76660-0e57-4ee2-a200-8df1b1dce5f3"
-                }
-
-            ];
-
-
-
-            this.$set('actions', actions);
-            this.$set('requests', requests);
-        },
-
         newAction: function(action) {
             this.$set('action', {
                 _id: "",
@@ -104,51 +44,137 @@ var app = new Vue({
             this.$set('page', 'showAction');
         },
         newRequest: function(action) {
-            this.$set('request.path', this.actions[0]._id);
+            this.fetchActions(this.newRequestStage2);
+        },
+        newRequestStage2: function(actions) {
+            this.$set('request', {
+                'path': actions[0]._id,
+                'params': "",
+                'response': ""
+            });
             this.$set('page', 'newRequest');
         },
         showAction: function(action) {
-            this.$set('action', action);
-            this.$set('page', 'showAction');
+            this.$http.get(baseUrl + "actions/" + encodeURIComponent(action._id)).then((response) => {
+                // success callback
+                this.$set('action', response.json());
+                this.$set('page', 'showAction');
+            }, (response) => {
+                doNotify("danger", "Failed to load request");
+            });
+
         },
         showRequest: function(request) {
-            this.$set('request', request);
-            this.$set('page', 'showRequest');
+            this.$http.get(baseUrl + "requests/" + encodeURIComponent(request.id)).then((response) => {
+                // success callback
+                console.log(response);
+                this.$set('request', response.json());
+                this.$set('page', 'showRequest');
+            }, (response) => {
+                doNotify("danger", "Failed to load request");
+            });
+
         },
         listActions: function() {
+            this.fetchActions();
+            this.$set('hash', 'actions');
             this.$set('page', 'listActions');
         },
         listRequests: function() {
+            this.fetchRequests();
+            this.$set('hash', 'requests');
             this.$set('page', 'listRequests');
         },
-        // Adds an action to the existing actions array
-        saveAction: function(action) {
-            if ((action._id) && (action.code)) {
-                if (action._rev) {
-                    action._rev = makeUUID();
-                    this.$set('action', action);
-                } else {
-                    action._rev = makeUUID();
-                    this.actions.push(action);
-                    this.action = {
-                        path: '',
-                        code: ''
-                    };
+        fetchActions: function(callback) {
+            this.$http.get(baseUrl + "actions").then((response) => {
+                // success callback
+                var actions = [];
+                response.json().rows.forEach(function(row) {
+                    actions.push(row.value);
+                });
+                this.$set('actions', actions);
+                if (callback) {
+                    callback(actions);
                 }
-                this.listActions();
+            }, (response) => {
+                // error callback
+                doNotify("danger", "Failed to load actions");
+            });
+        },
+        fetchRequests: function() {
+            this.$http.get(baseUrl + "requests").then((response) => {
+                // success callback
+                var requests = [];
+                response.json().rows.forEach(function(row) {
+                    requests.push(row.value);
+                });
+                this.$set('requests', requests);
+
+
+            }, (response) => {
+                // error callback
+                doNotify("danger", "Failed to load requests");
+            });
+        },
+        saveAction: function(action) {
+            //console.log(this.action);
+
+            if ((action._id) && (action.code)) {
+                var body = {
+                    "_id": action._id,
+                    "code": action.code
+                };
+                if (action._rev) {
+                    body._rev = action._rev;
+                    this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
+                        // success callback
+                        doNotify('info', 'Succesfully updated action: ' + response.json().id);
+                        this.listActions();
+                    }, (response) => {
+                        // error callback
+                        doNotify("danger", "Failed to update action");
+                    });
+
+                } else {
+                    this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
+                        // success callback
+                        doNotify('info', 'Succesfully updated action: ' + response.json().id);
+                        this.listActions();
+                    }, (response) => {
+                        var errTxt = "";
+                        if (response.status == 409) {
+                            errTxt = ": action with this path already exists";
+                        }
+                        // error callback
+                        doNotify("danger", "Failed to create action" + errTxt);
+                    });
+                }
+
+            } else {
+                doNotify("danger", "Path and Code need to be entered");
             }
         },
         saveRequest: function(request) {
-            request._id = makeUUID();
-            request.status = "new";
-            request.timestamp = Date.now();
-            this.requests.push(request);
-            this.listRequests();
+            this.$http.get(request.path, {
+                'params': JSON.parse(request.params)
+            }).then((response) => {
+                doNotify('info', 'Succesfully created request with ID: ' + response.json().id);
+            }, (response) => {
+                // error callback
+                doNotify("danger", "Failed to create new request");
+            });
         },
 
         deleteAction: function(action) {
-            console.log("delete action");
             if (confirm("Are you sure you want to delete action " + action._id + " ?")) {
+                this.$http.delete(baseUrl + "actions/" + encodeURIComponent(action._id),{
+                  '_rev': action._rev
+                }).then((response) => {
+                    doNotify('info', 'Succesfully deleted action with ID: ' + response.json().id);
+                }, (response) => {
+                    // error callback
+                    doNotify("danger", "Failed to create new request");
+                });
                 // $remove is a Vue convenience method similar to splice
                 this.actions.$remove(action);
                 this.listActions();
@@ -160,9 +186,13 @@ var app = new Vue({
     }
 });
 
-function dateSince(date) {
-    console.log("date", typeof(date), date);
+var pages = {
+    "#requests": app.listRequests,
+    "#actions": app.listActions
+};
 
+
+function dateSince(date) {
     var seconds = Math.floor((new Date() - date) / 1000);
 
     var interval = Math.floor(seconds / 31536000);
@@ -189,25 +219,31 @@ function dateSince(date) {
     return Math.floor(seconds) + " seconds";
 }
 
-function makeUUID() {
-    // 4-2-2-2-6
-    function rh(bytes) {
-        var str = "";
-        for (var i = 0; i < bytes; i++) {
-            str += Math.round((Math.random() * (256 - 0))).toString(16);
-        }
-        return str;
-    }
-    return rh(4) + "-" + rh(2) + "-" + rh(2) + "-" + rh(2) + "-" + rh(6);
-}
 
 //
 function setPage(hash) {
-    if (typeof pages[location.hash] == 'undefined') {
+    if (typeof pages[hash] == 'undefined') {
         hash = startPage;
     }
-    app.page = pages[hash].page;
-    app.hash = pages[hash].hash;
+    pages[hash]();
+
+}
+
+function doNotify(type, txt) {
+    $.notify({
+        // options
+        message: txt
+    }, {
+        // settings
+        element: 'body',
+        type: type,
+        mouse_over: "pause",
+        delay: 3000,
+        placement: {
+            from: "top",
+            align: "center"
+        }
+    });
 }
 
 window.onhashchange = function() {

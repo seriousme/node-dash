@@ -93,7 +93,7 @@ function handleRequestsChanges(){
 
 // list actions
 app.get('/dash/actions',  (req, res) => {
-  actions.list({include_docs:true}, handleResult(res));
+  actions.view('actions','all', handleResult(res));
 });
 
 // get info on an action
@@ -139,6 +139,7 @@ app.get('/*', function (req, res) {
 		}
 		// store request in the database
 		var record = {
+      "timestamp": Date.now(),
 			"path": req.path,
 			"status": "new",
 			"params": req.query

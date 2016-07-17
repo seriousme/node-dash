@@ -21,6 +21,7 @@
 </head>
 
 <body id="dash">
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -36,10 +37,10 @@
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li v-bind:class="{ 'active':(hash == 'requests') }">
-                        <a href="#requests">Requests</a>
+                        <a v-on:click="listRequests">Requests</a>
                     </li>
                     <li v-bind:class="{ 'active':(hash == 'actions') }">
-                        <a href="#actions">Actions</a>
+                        <a v-on:click="listActions">Actions</a>
                     </li>
                     <li>
                         <a href="https://github.com/seriousme/node-dash">About</a>
@@ -49,8 +50,8 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-    <!-- requests list -->
     <div class="container">
+        <!-- requests list -->
         <template v-if="page == 'listRequests'">
             <div class="row">
                 <div class="col-md-8">
@@ -70,12 +71,13 @@
                                     <td>{{ request.path }}</td>
                                     <td>{{ request.timestamp | since }}</td>
                                     <td>{{ request.status }}</td>
-                                    <td>{{ request._id }}</td>
+                                    <td>{{ request.id }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <button type="button" class="btn btn-sm btn-default" v-on:click="newRequest">New Request</button>
+                    <button type="button" class="btn btn-sm btn-default" v-on:click="listRequests">Refresh</button>
                 </div>
             </div>
         </template>
@@ -100,6 +102,7 @@
                         </table>
                     </div>
                     <button type="button" class="btn btn-sm btn-default" v-on:click="newAction">New action</button>
+                    <button type="button" class="btn btn-sm btn-default" v-on:click="listActions">Refresh</button>
                 </div>
             </div>
         </template>
@@ -158,12 +161,12 @@
                         <div class="form-group">
                             <label>Action</label>
                             <select class="form-control" rows="10" v-model="request.path">
-                                <option v-for="action in actions"> {{ action._id }} </option>
+                                <option v-for="action in actions"> {{ action._id }}</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Params</label>
-                            <textarea class="form-control" rows="10" v-model="request.params">{ a:5, b:2 }</textarea>
+                            <textarea class="form-control" rows="10" v-model="request.params">{ "a":5, "b":2 }</textarea>
                         </div>
                         <p>
                             <button type="button" class="btn btn-primary" v-on:click="saveRequest(request)">Submit</button>
@@ -181,8 +184,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <!-- http://bootstrap-notify.remabledesigns.com/ -->
+    <script src="js/bootstrap-notify.js"></script>
     <!-- Include Vue.js for data binding -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <!-- https://github.com/vuejs/vue-resource#readme -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.9.3/vue-resource.min.js"></script>
+    <!--  https://github.com/visionmedia/page.js -->
+    <script src="js/page.js"></script>
     <!-- Load application -->
     <script src="js/app.js"></script>
 

@@ -6,6 +6,7 @@ const maxTries = 10;
 const tries={};
 const retryMs = 500;
 
+const now = Date.now();
 // Handling socket errors in Nano is not trivial,
 // cheating here by doing a http request first,
 //if that works we'll start the show
@@ -59,12 +60,21 @@ bulkInsert("actions",[{
 	}, {
 		"_id" : "/myactions/mult",
 		"code" : "function main(params){ return { \"mult\":Number(params.a) * Number(params.b)};}"
+	},
+	{
+	    "views": {
+	        "all": {
+	            "map": "function (doc) {\n    emit(null,{'_id':doc._id,'_rev':doc._rev});\n}\n"
+	        }
+	    },
+			"_id" : "_design/actions"
 	}
 ]);
 
 bulkInsert("requests",[
 	{
 		"path" : "/myactions/sum",
+		"timestamp":  (now - 8000000),
 		"params" : {
 			"a" : 1,
 			"b" : 2
@@ -73,33 +83,32 @@ bulkInsert("requests",[
 			"sum" : "3"
 		},
 		"status" : "success",
-		"_id" : "00aab0e9-fedb-4a60-92a2-972646576ada"
 	},
 	{
 		"path" : "/myactions/sum",
+		"timestamp": (now - 320000),
 		"params" : {
 			"a" : 1,
 			"b" : 2
 		},
 		"status" : "new",
-		"_id" : "15e0dcbc-a518-4c46-8716-1c39dde93df4"
 	},
 	{
 		"path" : "/myactions/mult",
+		"timestamp": (now - 140000),
 		"params" : {
 			"a" : 1,
 			"b" : 2
 		},
 		"status" : "new",
-		"_id" : "a6b76660-0e57-4ee2-a200-8df1b1dce5f3"
 	},
 	{
 		"views" : {
 			"all" : {
-				"map" : "function (doc) {\n  emit(doc._id, 1);\n}"
+				 "map": "function (doc) {\n  emit(doc.timestamp,{'id':doc._id, 'path':doc.path, 'status':doc.status,'timestamp':doc.timestamp});\n}"
 			},
 			"new" : {
-				"map" : "function (doc) {\n if (doc.status == \"new\"){\n  emit(doc._id, 1);\n }\n}"
+				 "map" : "function (doc) {\n if (doc.status == \"new\"){\n  emit(doc._id, 1);\n }\n}"
 			}
 		},
 		"_id" : "_design/requests"
