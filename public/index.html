@@ -10,7 +10,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="/dash/ui/css/custom.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,10 +37,10 @@
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li v-bind:class="{ 'active':(hash == 'requests') }">
-                        <a v-on:click="listRequests">Requests</a>
+                        <a href="/dash/ui/requests">Requests</a>
                     </li>
                     <li v-bind:class="{ 'active':(hash == 'actions') }">
-                        <a v-on:click="listActions">Actions</a>
+                        <a href="/dash/ui/actions">Actions</a>
                     </li>
                     <li>
                         <a href="https://github.com/seriousme/node-dash">About</a>
@@ -67,7 +67,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="clickList" v-for="request in requests" v-on:click="showRequest(request)">
+                                <tr class="clickList" v-for="request in requests" v-on:click="setPage('/requests/',request.id)">
                                     <td>{{ request.path }}</td>
                                     <td>{{ request.timestamp | since }}</td>
                                     <td>{{ request.status }}</td>
@@ -76,7 +76,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <button type="button" class="btn btn-sm btn-default" v-on:click="newRequest">New Request</button>
+                    <button type="button" class="btn btn-sm btn-default" v-on:click="setPage('/requests/new')">New Request</button>
                     <button type="button" class="btn btn-sm btn-default" v-on:click="listRequests">Refresh</button>
                 </div>
             </div>
@@ -95,13 +95,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="clickList" v-for="action in actions" v-on:click="showAction(action)">
+                                <tr class="clickList" v-for="action in actions" v-on:click="setPage('/actions/',action._id)">
                                     <td>{{ action._id }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <button type="button" class="btn btn-sm btn-default" v-on:click="newAction">New action</button>
+                    <button type="button" class="btn btn-sm btn-default" v-on:click="setPage('/actions/new')">New action</button>
                     <button type="button" class="btn btn-sm btn-default" v-on:click="listActions">Refresh</button>
                 </div>
             </div>
@@ -128,7 +128,7 @@
                         </div>
                         <p>
                             <button type="button" class="btn btn-primary" v-on:click="saveAction(action)">Save</button>
-                            <button type="button" class="btn btn-warning" v-on:click="listActions">Cancel</button>
+                            <button type="button" class="btn btn-warning" v-on:click="setPage('/actions')">Cancel</button>
                             <button type="button" class="btn btn-danger" v-show="exists(action._rev)" v-on:click="deleteAction(action)">Delete</button>
                         </p>
                     </form>
@@ -146,7 +146,7 @@
                             <textarea class="form-control" rows="15">{{ request | json 2 }}</textarea>
                         </div>
                         <p>
-                            <button type="button" class="btn btn-primary" v-on:click="listRequests">Back</button>
+                            <button type="button" class="btn btn-primary" v-on:click="setPage('/requests')">Back</button>
                         </p>
                     </form>
                 </div>
@@ -170,7 +170,7 @@
                         </div>
                         <p>
                             <button type="button" class="btn btn-primary" v-on:click="saveRequest(request)">Submit</button>
-                            <button type="button" class="btn btn-warning" v-on:click="listRequests">Cancel</button>
+                            <button type="button" class="btn btn-warning" v-on:click="setPage('/requests')">Cancel</button>
                         </p>
                     </form>
                 </div>
@@ -185,15 +185,15 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <!-- http://bootstrap-notify.remabledesigns.com/ -->
-    <script src="js/bootstrap-notify.js"></script>
+    <script src="/dash/ui/js/bootstrap-notify.js"></script>
     <!-- Include Vue.js for data binding -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
     <!-- https://github.com/vuejs/vue-resource#readme -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.9.3/vue-resource.min.js"></script>
     <!--  https://github.com/visionmedia/page.js -->
-    <script src="js/page.js"></script>
+    <script src="/dash/ui/js/page.js"></script>
     <!-- Load application -->
-    <script src="js/app.js"></script>
+    <script src="/dash/ui/js/app.js"></script>
 
 </body>
 

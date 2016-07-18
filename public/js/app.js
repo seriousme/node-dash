@@ -1,13 +1,14 @@
 // app.js
 
-
-var startPage = "#requests";
-var baseUrl = "/dash/";
+var baseUrl="/dash/";
 
 Vue.filter('since', function(timestamp) {
     return (dateSince(Number(timestamp)) + " ago");
 });
 
+Vue.filter('encodeURI', function(data) {
+    return (encodeURIComponent(data));
+});
 
 var app = new Vue({
 
@@ -36,14 +37,14 @@ var app = new Vue({
     methods: {
 
         // We dedicate a method to retrieving and setting some data
-        newAction: function(action) {
+        newAction: function() {
             this.$set('action', {
                 _id: "",
                 code: ""
             });
             this.$set('page', 'showAction');
         },
-        newRequest: function(action) {
+        newRequest: function() {
             this.fetchActions(this.newRequestStage2);
         },
         newRequestStage2: function(actions) {
@@ -54,8 +55,9 @@ var app = new Vue({
             });
             this.$set('page', 'newRequest');
         },
-        showAction: function(action) {
-            this.$http.get(baseUrl + "actions/" + encodeURIComponent(action._id)).then((response) => {
+        showAction: function(ctx) {
+            var actionid = ctx.params[0];
+            this.$http.get(baseUrl + "actions/" + encodeURIComponent(actionid)).then((response) => {
                 // success callback
                 this.$set('action', response.json());
                 this.$set('page', 'showAction');
@@ -64,10 +66,10 @@ var app = new Vue({
             });
 
         },
-        showRequest: function(request) {
-            this.$http.get(baseUrl + "requests/" + encodeURIComponent(request.id)).then((response) => {
+        showRequest: function(ctx) {
+          var requestid = ctx.params.requestid;
+            this.$http.get(baseUrl + "requests/" + encodeURIComponent(requestid)).then((response) => {
                 // success callback
-                console.log(response);
                 this.$set('request', response.json());
                 this.$set('page', 'showRequest');
             }, (response) => {
@@ -129,7 +131,7 @@ var app = new Vue({
                     this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
                         // success callback
                         doNotify('info', 'Succesfully updated action: ' + response.json().id);
-                        this.listActions();
+                        page.show('/actions');
                     }, (response) => {
                         // error callback
                         doNotify("danger", "Failed to update action");
@@ -139,7 +141,7 @@ var app = new Vue({
                     this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
                         // success callback
                         doNotify('info', 'Succesfully updated action: ' + response.json().id);
-                        this.listActions();
+                        page.show('/actions');
                     }, (response) => {
                         var errTxt = "";
                         if (response.status == 409) {
@@ -177,19 +179,23 @@ var app = new Vue({
                 });
                 // $remove is a Vue convenience method similar to splice
                 this.actions.$remove(action);
-                this.listActions();
+                page.show('/actions');
             }
         },
         exists: function(v) {
             return (typeof(v) != "undefined");
+        },
+        setPage: function(path,v){
+          if (typeof(v) == 'string'){
+             path = path + encodeURIComponent(v);
+          }
+          console.log("setPage",path);
+          page.show(path);
         }
     }
 });
 
-var pages = {
-    "#requests": app.listRequests,
-    "#actions": app.listActions
-};
+
 
 
 function dateSince(date) {
@@ -220,15 +226,6 @@ function dateSince(date) {
 }
 
 
-//
-function setPage(hash) {
-    if (typeof pages[hash] == 'undefined') {
-        hash = startPage;
-    }
-    pages[hash]();
-
-}
-
 function doNotify(type, txt) {
     $.notify({
         // options
@@ -246,8 +243,12 @@ function doNotify(type, txt) {
     });
 }
 
-window.onhashchange = function() {
-    setPage(location.hash);
-};
-
-setPage(location.hash);
+page.base(baseUrl+'ui');
+page('/requests', app.listRequests);
+page('/requests/new', app.newRequest);
+page('/requests/:requestid', app.showRequest);
+page('/actions', app.listActions);
+page('/actions/new', app.newAction);
+page('/actions/*', app.showAction);
+page('/','/requests');
+page.start();

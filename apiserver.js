@@ -7,6 +7,7 @@ const eventEmitter = require('events'),
    evt = new eventEmitter(),
    express = require('express'),
    join = require('path').join,
+   bodyParser = require('body-parser'),
    nano    = require('nano')(DbUrl),
    actions = nano.use("actions"),
    requests = nano.use("requests"),
@@ -16,10 +17,6 @@ const eventEmitter = require('events'),
 const maxTime = 2000; // time in ms before timing out sync requests
 const changeInterval = 200; // interval in ms to look for changes
 var lastSeq = 0;
-
-var bodyParser = require('body-parser');
-app.use(bodyParser.json()); // for parsing application/json
-app.use('/dash/ui', express.static(staticDir));
 
 
 function handleResult(res,status){
@@ -90,6 +87,18 @@ function handleRequestsChanges(){
 
 
 
+// for parsing application/json
+app.use(bodyParser.json());
+
+// the UI
+
+app.use('/dash/ui', express.static(staticDir));
+
+app.get('/dash/ui/*', function (req, res, next) {
+  res.sendFile(join(__dirname,staticDir,'/index.html'));
+});
+
+
 
 // the actions
 
@@ -123,10 +132,6 @@ app.get('/dash/requests', function (req, res) {
 // get a specific request
 app.get('/dash/requests/:requestid', function (req, res) {
   requests.get(req.params.requestid, handleResult(res));
-});
-
-app.get('/dash/ui/*', function (req, res) {
-  res.sendFile(join(__dirname,staticDir,'/index.html'));
 });
 
 // root path
