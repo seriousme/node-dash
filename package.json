@@ -10,11 +10,10 @@
   "author": "Hans Klunder",
   "license": "Apache-2.0",
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
     "nano": "^6.2.0",
     "pouchdb-server": "^1.2.0"
-  },
-  "bin": {
-    "node-dash": "cli.js"
   },
   "devDependencies": {},
   "repository": {
