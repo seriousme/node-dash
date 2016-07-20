@@ -7,6 +7,7 @@ const tries={};
 const retryMs = 500;
 
 const now = Date.now();
+
 // Handling socket errors in Nano is not trivial,
 // cheating here by doing a http request first,
 //if that works we'll start the show
@@ -74,7 +75,7 @@ bulkInsert("actions",[{
 bulkInsert("requests",[
 	{
 		"path" : "/myactions/sum",
-		"timestamp":  (now - 8000000),
+		"timestamp": (new Date((now - 8000000))).toISOString(),
 		"params" : {
 			"a" : 1,
 			"b" : 2
@@ -86,7 +87,7 @@ bulkInsert("requests",[
 	},
 	{
 		"path" : "/myactions/sum",
-		"timestamp": (now - 320000),
+		"timestamp": (new Date((now - 320000))).toISOString(),
 		"params" : {
 			"a" : 1,
 			"b" : 2
@@ -95,7 +96,7 @@ bulkInsert("requests",[
 	},
 	{
 		"path" : "/myactions/mult",
-		"timestamp": (now - 140000),
+		"timestamp": (new Date((now - 140000))).toISOString(),
 		"params" : {
 			"a" : 1,
 			"b" : 2

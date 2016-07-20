@@ -150,7 +150,7 @@ app.get('/*', function (req, res) {
 		}
 		// store request in the database
 		var record = {
-      "timestamp": Date.now(),
+      "timestamp": (new Date()).toIsoString(),
 			"path": req.path,
 			"status": "new",
 			"params": req.query

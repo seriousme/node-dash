@@ -3,7 +3,7 @@
 var baseUrl="/dash/";
 
 Vue.filter('since', function(timestamp) {
-    return (dateSince(Number(timestamp)) + " ago");
+    return (dateSince(Date.parse(timestamp)) + " ago");
 });
 
 Vue.filter('encodeURI', function(data) {
