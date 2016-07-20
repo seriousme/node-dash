@@ -19,10 +19,12 @@ function processAction(action,request){
 	 }
 	 catch(err){
 		 if (! actionOk){
-			request.status = "invalid action definition";
+			request.status = "failed";
+      request.statusDetail ="invalid action definition";
 		 }
 		 else{
 			request.status = "failed";
+      request.statusDetail ="action execution failed";
 		 }
 		 request.error = err;
 	 }
