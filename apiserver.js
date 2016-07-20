@@ -40,7 +40,7 @@ function handleAsync(res){
 function returnSyncResult(res,id,type){
 	if (type == "timeout"){
 		res.status(504); // timeout
-		return res.send("request timed out");
+		return res.send("request " + id + " timed out");
 	}
   // return result
 	requests.get(id, handleResult(res));
