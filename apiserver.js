@@ -73,12 +73,14 @@ function handleRequestsChanges(){
 				return;
 			}
 			if ( lastSeq != body.last_seq){
-				body.results.forEach((item)=>{
-					const status = item.doc.status;
-					if (( status != "new" ) && (status != "processing")){
-						evt.emit(item.id);
-					}
-				});
+        if (typeof(body.results)==='object'){
+  				body.results.forEach((item)=>{
+  					const status = item.doc.status;
+  					if (( status != "new" ) && (status != "processing")){
+  						evt.emit(item.id);
+  					}
+  				});
+        }
 			}
 			lastSeq = body.last_seq;
 		}
