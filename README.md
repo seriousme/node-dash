@@ -1,7 +1,7 @@
 # node-dash
 An experiment to build a serverless setup using node.js.
 
-![Node-dash design](https://rawgit.com/seriousme/node-dash/master/Node-dash.svg)
+![Node-dash design](https://rawgit.com/seriousme/node-dash/master/node-dash.v2.svg)
 
 The repository and queue are implemented using [Pouchdb](https://pouchdb.com/), but Couchdb (http://couchdb.apache.org/) will work as well.
 
