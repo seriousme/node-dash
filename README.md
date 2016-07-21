@@ -11,7 +11,7 @@ There are 3 options to get this running:
 - docker run -d -p 8080:8080 seriousme/node-dash
 - use the docker compose file in the docker folder
 
-Once it runs you can send your browser to http://<host>:8080/ which will show you a web interface.
+Once it runs you can send your browser to http://\<your host\>:8080/ which will show you a web interface.
 Alternatively you can use any REST client (e.g. CURL/Postman/etc) to talk to the API server
 
 ## REST endpoints
