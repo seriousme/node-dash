@@ -61,3 +61,4 @@ curl -X PUT -H "Content-Type: application/json" -d '{
   "_rev": "1-dadb9a995a83675dea6954a1515e08bb"
 }' "http://localhost:8080/dash/actions/%2fmyactions%2fmin"
 ```
+
