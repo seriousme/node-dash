@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startdb": "pouchdb-server -d pouchdb"
+    "startdb": "pouchdb-server -d pouchdb",
+    "createdb": "node createdb",
+    "actionrunner": "node actionrunner",
+    "apiserver": "node apiserver",
+    "start": "run-p startdb createdb actionrunner apiserver",
+    "start2": "run-p startdb actionrunner apiserver"
   },
   "author": "Hans Klunder",
   "license": "Apache-2.0",
@@ -15,7 +20,9 @@
     "nano": "^6.2.0",
     "pouchdb-server": "^1.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "npm-run-all": "^2.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seriousme/node-dash.git"
