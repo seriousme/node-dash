@@ -152,7 +152,7 @@ app.get('/*', function (req, res) {
 		}
 		// store request in the database
 		var record = {
-      "timestamp": (new Date()).toIsoString(),
+      "timestamp": (new Date()).toISOString(),
 			"path": req.path,
 			"status": "new",
 			"params": req.query
