@@ -1,5 +1,6 @@
 
 const DbUrl= process.env.DB_URL || 'http://localhost:5984';
+const {VM} = require('vm2');
 
 const nano    = require('nano')(DbUrl),
       actions = nano.use("actions"),
@@ -8,25 +9,26 @@ const nano    = require('nano')(DbUrl),
 
 function processAction(action,request){
 	 console.log("processing",request._id);
-	 var actionOk = false;
+   const vm = new VM({
+       timeout: 1000,
+       sandbox: {}
+   });
 	 try {
-		 // instantiate the action
-		 eval(action.code);
-		 actionOk = true;
 		 // execute the action
-		 request.result = eval(main(request.params));
+     const params= JSON.stringify(request.params);
+     const script= `
+       const params= ${params};
+       ${action.code}
+       main(params);
+     `;
+     console.log(script);
+		 request.result = vm.run(script);
+
 		 request.status = "success";
 	 }
 	 catch(err){
-		 if (! actionOk){
-			request.status = "failed";
-      request.statusDetail ="invalid action definition";
-		 }
-		 else{
-			request.status = "failed";
-      request.statusDetail ="action execution failed";
-		 }
-		 request.error = err;
+		 request.status = "failed";
+  	 request.error = err.message;
 	 }
 	 // and update the repository
 	 requests.insert(request);
