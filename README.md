@@ -62,3 +62,11 @@ curl -X PUT -H "Content-Type: application/json" -d '{
 }' "http://localhost:8080/dash/actions/%2fmyactions%2fmin"
 ```
 
+## Todo
+Its an experiment, so don't use this in production unless you know what you are doing !
+E.g. isolation between actioncode and the framework is based on node VM functionality
+which offers some protection but is not bulletproof against hostile actions !
+
+A better, and more elaborate, approach would be to inject the action code into a docker
+container and then send the requests to that container. If the container is then idle for
+say 5 minutes it can be shut.
