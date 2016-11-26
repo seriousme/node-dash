@@ -20,7 +20,8 @@
     <![endif]-->
 </head>
 
-<body id="dash">
+<body>
+  <div id="dash">
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
@@ -124,7 +125,7 @@
                         </div>
                         <div class="form-group" v-show="exists(action._rev)">
                             <label>Revision</label>
-                            <input class="form-control" value="{{ action._rev }}" readonly>
+                            <input class="form-control" v-bind:value="action._rev" readonly>
                         </div>
                         <p>
                             <button type="button" class="btn btn-primary" v-on:click="saveAction(action)">Save</button>
@@ -143,7 +144,7 @@
                     <form role="form">
                         <div class="form-group">
                             <label>Request</label>
-                            <textarea class="form-control" rows="15">{{ request | json 2 }}</textarea>
+                            <textarea class="form-control" rows="15">{{ request }}</textarea>
                         </div>
                         <p>
                             <button type="button" class="btn btn-primary" v-on:click="setPage('/requests')">Back</button>
@@ -177,6 +178,7 @@
             </div>
         </template>
     </div>
+  </div>
 
 
 
@@ -187,9 +189,9 @@
     <!-- http://bootstrap-notify.remabledesigns.com/ -->
     <script src="/dash/ui/js/bootstrap-notify.js"></script>
     <!-- Include Vue.js for data binding -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.3/vue.min.js"></script>
     <!-- https://github.com/vuejs/vue-resource#readme -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.9.3/vue-resource.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.min.js"></script>
     <!--  https://github.com/visionmedia/page.js -->
     <script src="/dash/ui/js/page.js"></script>
     <!-- Load application -->
