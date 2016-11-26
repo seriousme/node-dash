@@ -56,7 +56,7 @@ var app = new Vue({
                 appData.action = response.body;
                 appData.page = 'showAction';
             }, (response) => {
-                doNotify("danger", "Failed to load request");
+                doNotify("danger", "Failed to load action");
             });
 
         },
