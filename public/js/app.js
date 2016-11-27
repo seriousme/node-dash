@@ -1,6 +1,6 @@
 // app.js
 
-var baseUrl="/dash/";
+var baseUrl = "/dash/";
 
 Vue.filter('since', function(timestamp) {
     return (dateSince(Date.parse(timestamp)) + " ago");
@@ -39,77 +39,70 @@ var app = new Vue({
             appData.page = 'showAction';
         },
         newRequest: function() {
-            this.fetchActions(this.newRequestStage2);
-        },
-        newRequestStage2: function(actions) {
+          var uri = baseUrl + "actions";
+          this.fetchItems('actions', uri, (items) => {
+            appData.actions = items;
             appData.request = {
-                'path': actions[0]._id,
-                'params': "",
+                'path': items[0]._id,
+                'params': { "a":5, "b":2 },
                 'response': ""
             };
             appData.page = 'newRequest';
+          });
+        },
+        showItem: function(name, uri, callback) {
+            this.$http.get(uri).then((response) => {
+                // success callback
+                if (callback) {
+                    callback(response.body);
+                }
+            }, (response) => {
+                doNotify("danger", "Failed to load " + name);
+            });
         },
         showAction: function(ctx) {
-            var actionid = ctx.params[0];
-            this.$http.get(baseUrl + "actions/" + encodeURIComponent(actionid)).then((response) => {
-                // success callback
-                appData.action = response.body;
+            var uri = baseUrl + "actions/" + encodeURIComponent(ctx.params[0]);
+            this.showItem('action', uri, (item) => {
+                appData.action = item;
                 appData.page = 'showAction';
-            }, (response) => {
-                doNotify("danger", "Failed to load action");
             });
-
         },
         showRequest: function(ctx) {
-          var requestid = ctx.params.requestid;
-            this.$http.get(baseUrl + "requests/" + encodeURIComponent(requestid)).then((response) => {
-                // success callback
-                appData.request =  response.body;
+            var uri = baseUrl + "requests/" + encodeURIComponent(ctx.params.requestid);
+            this.showItem('request', uri, (item) => {
+                appData.request = item;
                 appData.page = 'showRequest';
-            }, (response) => {
-                doNotify("danger", "Failed to load request");
             });
-
         },
-        listActions: function() {
-            this.fetchActions();
-            appData.hash = 'actions';
-            appData.page = 'listActions';
-        },
-        listRequests: function() {
-            this.fetchRequests();
-            appData.hash = 'requests';
-            appData.page = 'listRequests';
-        },
-        fetchActions: function(callback) {
-            this.$http.get(baseUrl + "actions").then((response) => {
+        fetchItems(name, uri, callback) {
+            this.$http.get(uri).then((response) => {
                 // success callback
-                var actions = [];
+                var items = [];
                 response.body.rows.forEach(function(row) {
-                    actions.push(row.value);
+                    items.push(row.value);
                 });
-                appData.actions = actions;
                 if (callback) {
-                    callback(actions);
+                    callback(items);
                 }
             }, (response) => {
                 // error callback
-                doNotify("danger", "Failed to load actions");
+                doNotify("danger", "Failed to load " + name);
             });
         },
-        fetchRequests: function() {
-            this.$http.get(baseUrl + "requests").then((response) => {
-                // success callback
-                var requests = [];
-                response.body.rows.forEach(function(row) {
-                    requests.push(row.value);
-                });
-                appData.requests = requests;
-
-
-            }, (response) => {
-                // error callback
-                doNotify("danger", "Failed to load requests");
+        listActions: function() {
+            var uri = baseUrl + "actions";
+            this.fetchItems('actions', uri, (items) => {
+                appData.actions = items;
+                appData.hash = 'actions';
+                appData.page = 'listActions';
+            });
+        },
+        listRequests: function() {
+            var uri = baseUrl + "requests";
+            this.fetchItems('requests', uri, (items) => {
+                appData.requests = items;
+                appData.hash = 'requests';
+                appData.page = 'listRequests';
             });
         },
         saveAction: function(action) {
@@ -120,39 +113,30 @@ var app = new Vue({
                     "_id": action._id,
                     "code": action.code
                 };
+                var txt = "created";
                 if (action._rev) {
                     body._rev = action._rev;
-                    this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
-                        // success callback
-                        doNotify('info', 'Succesfully updated action: ' + response.body.id);
-                        page.show('/actions');
-                    }, (response) => {
-                        // error callback
-                        doNotify("danger", "Failed to update action");
-                    });
-
-                } else {
-                    this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
-                        // success callback
-                        doNotify('info', 'Succesfully updated action: ' + response.body.id);
-                        page.show('/actions');
-                    }, (response) => {
-                        var errTxt = "";
-                        if (response.status == 409) {
-                            errTxt = ": action with this path already exists";
-                        }
-                        // error callback
-                        doNotify("danger", "Failed to create action" + errTxt);
-                    });
+                    txt = "updated";
                 }
-
+                this.$http.put(baseUrl + "actions/" + encodeURIComponent(action._id), body).then((response) => {
+                    // success callback
+                    doNotify('info', 'Succesfully '+ txt +' action: ' + response.body.id);
+                    page.show('/actions');
+                }, (response) => {
+                    // error callback
+                    var errTxt = "";
+                    if (response.status == 409) {
+                        errTxt = ": action with this path already exists";
+                    }
+                    doNotify("danger", "Failed to save action" + errTxt);
+                });
             } else {
                 doNotify("danger", "Path and Code need to be entered");
             }
         },
         saveRequest: function(request) {
             this.$http.get(request.path, {
-                'params': JSON.parse(request.params)
+                'params': request.params
             }).then((response) => {
                 doNotify('info', 'Succesfully created request with ID: ' + response.body.id);
             }, (response) => {
@@ -163,33 +147,30 @@ var app = new Vue({
 
         deleteAction: function(action) {
             if (confirm("Are you sure you want to delete action " + action._id + " ?")) {
-                this.$http.delete(baseUrl + "actions/" + encodeURIComponent(action._id),{
-                  '_rev': action._rev
+                this.$http.delete(baseUrl + "actions/" + encodeURIComponent(action._id), {
+                    '_rev': action._rev
                 }).then((response) => {
                     doNotify('info', 'Succesfully deleted action with ID: ' + response.body.id);
+                    this.fetchActions();
                 }, (response) => {
                     // error callback
                     doNotify("danger", "Failed to create new request");
                 });
-                var index = this.actions.indexOf(action);
-                this.actions.splice(index, 1);
                 page.show('/actions');
             }
         },
         exists: function(v) {
             return (typeof(v) != "undefined");
         },
-        setPage: function(path,v){
-          if (typeof(v) == 'string'){
-             path = path + encodeURIComponent(v);
-          }
-          console.log("setPage",path);
-          page.show(path);
+        setPage: function(path, v) {
+            if (typeof(v) == 'string') {
+                path = path + encodeURIComponent(v);
+            }
+            console.log("setPage", path);
+            page.show(path);
         }
     }
 });
-
-
 
 
 function dateSince(date) {
@@ -237,12 +218,12 @@ function doNotify(type, txt) {
     });
 }
 
-page.base(baseUrl+'ui');
+page.base(baseUrl + 'ui');
 page('/requests', app.listRequests);
 page('/requests/new', app.newRequest);
 page('/requests/:requestid', app.showRequest);
 page('/actions', app.listActions);
 page('/actions/new', app.newAction);
 page('/actions/*', app.showAction);
-page('/','/requests');
+page('/', '/requests');
 page.start();
