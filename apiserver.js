@@ -2,16 +2,15 @@ const DbUrl = process.env.DB_URL || 'http://localhost:5984'
 const ApiPort = process.env.API_PORT || 8080
 const staticDir = 'public'
 
-const eventEmitter = require('events'),
-  evt = new eventEmitter(),
-  express = require('express'),
-  join = require('path').join,
-  bodyParser = require('body-parser'),
-  nano = require('nano')(DbUrl),
-  actions = nano.use('actions'),
-  requests = nano.use('requests'),
-  app = express()
-
+const EventEmitter = require('events')
+const evt = new EventEmitter()
+const express = require('express')
+const join = require('path').join
+const bodyParser = require('body-parser')
+const nano = require('nano')(DbUrl)
+const actions = nano.use('actions')
+const requests = nano.use('requests')
+const app = express()
 
 const maxTime = 2000 // time in ms before timing out sync requests
 const changeInterval = 200 // interval in ms to look for changes
@@ -35,7 +34,7 @@ function handleAsync (res) {
 }
 
 function returnSyncResult (res, id, type) {
-  if (type == 'timeout') {
+  if (type === 'timeout') {
     res.status(504) // timeout
     return res.send('request ' + id + ' timed out')
   }
@@ -69,11 +68,11 @@ function handleRequestsChanges () {
       if (err) {
         return
       }
-      if (lastSeq != body.last_seq) {
+      if (lastSeq !== body.last_seq) {
         if (typeof (body.results) === 'object') {
           body.results.forEach((item) => {
             const status = item.doc.status
-            if ((status != 'new') && (status != 'processing')) {
+            if ((status !== 'new') && (status !== 'processing')) {
               evt.emit(item.id)
             }
           })
