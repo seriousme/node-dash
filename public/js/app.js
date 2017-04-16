@@ -44,7 +44,7 @@ var app = new Vue({
         appData.actions = items
         appData.request = {
           'path': items[0]._id,
-          'params': { 'a': 5, 'b': 2 },
+          'params': '{ "a": 5, "b": 2 }',
           'response': ''
         }
         appData.page = 'newRequest'
@@ -74,7 +74,7 @@ var app = new Vue({
         appData.page = 'showRequest'
       })
     },
-    fetchItems(name, uri, callback) {
+    fetchItems (name, uri, callback) {
       this.$http.get(uri).then((response) => {
         // success callback
         var items = []
@@ -125,7 +125,7 @@ var app = new Vue({
         }, (response) => {
           // error callback
           var errTxt = ''
-          if (response.status == 409) {
+          if (response.status === 409) {
             errTxt = ': action with this path already exists'
           }
           doNotify('danger', 'Failed to save action' + errTxt)
@@ -136,7 +136,7 @@ var app = new Vue({
     },
     saveRequest: function (request) {
       this.$http.get(request.path, {
-        'params': request.params
+        'params': JSON.parse(request.params)
       }).then((response) => {
         doNotify('info', 'Succesfully created request with ID: ' + response.body.id)
       }, (response) => {
@@ -160,10 +160,10 @@ var app = new Vue({
       }
     },
     exists: function (v) {
-      return (typeof (v) != 'undefined')
+      return (typeof (v) !== 'undefined')
     },
     setPage: function (path, v) {
-      if (typeof (v) == 'string') {
+      if (typeof (v) === 'string') {
         path = path + encodeURIComponent(v)
       }
       console.log('setPage', path)
