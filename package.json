@@ -1,6 +1,6 @@
 {
   "name": "node-dash",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Serverless system",
   "main": "index.js",
   "scripts": {
@@ -15,11 +15,11 @@
   "author": "Hans Klunder",
   "license": "Apache-2.0",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
     "nano": "^6.2.0",
-    "pouchdb-server": "^1.2.0",
-    "vm2": "^3.0.1"
+    "pouchdb-server": "^1.2.1",
+    "vm2": "^3.4.6"
   },
   "devDependencies": {
     "npm-run-all": "^2.3.0"
