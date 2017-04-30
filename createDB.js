@@ -1,5 +1,6 @@
 var DbUrl = process.env.DB_URL || 'http://localhost:5984'
-var nano = require('nano')(DbUrl)
+const PouchDB = require('pouchdb-node')
+
 var http = require('http')
 
 const maxTries = 10
@@ -13,12 +14,12 @@ const now = Date.now()
 // if that works we'll start the show
 
 function bulkInsert (dbname, data) {
-  if (typeof (tries[dbname]) == 'undefined') {
+  if (typeof (tries[dbname]) === 'undefined') {
     tries[dbname] = 0
   }
   console.log('Attempt', tries[dbname], 'of', maxTries, 'to connect to ', dbname, 'at', DbUrl)
   http.get(DbUrl, (res) => {
-    console.log('Database', dbname, 'is up !')
+    console.log('Database server at', DbUrl, 'is up !')
     // consume response body
     res.resume()
     doInsert(dbname, data)
@@ -26,31 +27,33 @@ function bulkInsert (dbname, data) {
     // console.log(`Got error: ${e.message}`)
     if (tries[dbname]++ < maxTries) {
       console.log('Going to retry in', retryMs, 'ms')
-      setTimeout(() => {
-        bulkInsert(dbname, data);}, retryMs)
-    }else {
+      setTimeout(() => { bulkInsert(dbname, data) }, retryMs)
+    } else {
       console.log('Failed to connect to', dbname, 'at', DbUrl)
     }
   })
 }
 
+function destroyDB (dbname, callback) {
+  const db = new PouchDB(`${DbUrl}/${dbname}`)
+  db.destroy(function (err, _) {
+    if (err) {
+      return console.log('destroying database', dbname, 'failed:', err)
+    }
+    callback()
+  })
+}
+
 function doInsert (dbname, data) {
-  // clean up the database we created previously
-  nano.db.destroy(dbname, function (err, body) {
-    // create the new database
-    nano.db.create(dbname, function () {
-      // specify the database we are going to use
-      var db = nano.use(dbname)
-      // and insert a document in it
-      db.bulk({
-        'docs': data
-      }, function (err, body) {
-        if (err) {
-          console.log(err, body)
-        } else {
-          console.log(dbname, 'loaded ok')
-        }
-      })
+  // clean up the database we migh have created previously
+  destroyDB(dbname, function () {
+    const db = new PouchDB(`${DbUrl}/${dbname}`)
+    db.bulkDocs(data, function (err, response) {
+      if (err) {
+        console.log(err, response)
+      } else {
+        console.log(dbname, 'loaded ok')
+      }
     })
   })
 }
@@ -62,14 +65,14 @@ bulkInsert('actions', [{
   '_id': '/myactions/mult',
   'code': 'function main(params){ return { "mult":Number(params.a) * Number(params.b)};}'
 },
-  {
-    'views': {
-      'all': {
-        'map': "function (doc) {\n    emit(null,{'_id':doc._id,'_rev':doc._rev});\n}\n"
-      }
-    },
-    '_id': '_design/actions'
-  }
+{
+  'views': {
+    'all': {
+      'map': "function (doc) {\n    emit(null,{'_id':doc._id,'_rev':doc._rev});\n}\n"
+    }
+  },
+  '_id': '_design/actions'
+}
 ])
 
 bulkInsert('requests', [
@@ -111,6 +114,10 @@ bulkInsert('requests', [
       'new': {
         'map': 'function (doc) {\n if (doc.status == "new"){\n  emit(doc._id, 1);\n }\n}'
       }
+    },
+    'filters': {
+      'iscompleted': 'function (doc) {\n return ((doc.status === "success") || (doc.status === "failed"));}',
+      'isnew': 'function (doc) {\n return (doc.status === "new");}'
     },
     '_id': '_design/requests'
   }

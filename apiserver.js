@@ -7,20 +7,19 @@ const evt = new EventEmitter()
 const express = require('express')
 const join = require('path').join
 const bodyParser = require('body-parser')
-const nano = require('nano')(DbUrl)
-const actions = nano.use('actions')
-const requests = nano.use('requests')
+const PouchDB = require('pouchdb-node')
+const actions = new PouchDB(`${DbUrl}/actions`)
+const requests = new PouchDB(`${DbUrl}/requests`)
 const app = express()
 
 const maxTime = 2000 // time in ms before timing out sync requests
-const changeInterval = 200 // interval in ms to look for changes
-var lastSeq = 0
+const retryMs = 500  // time in ms to wait before trying to resubscribe to the change feed
 
 function handleResult (res, status) {
   var statusCode = status || 200
   return function (err, body) {
     if (err) {
-      res.status(err.statusCode)
+      res.status(err.status)
       return res.send(err.message)
     }
     res.status(statusCode)
@@ -61,28 +60,6 @@ function handleSync (res) {
   }
 }
 
-// pouchDB seems to have a problem with streaming changes and with filtering changes, so we poll on a regular basis and filter here
-function handleRequestsChanges () {
-  requests.changes({ since: lastSeq, include_docs: true },
-    (err, body) => {
-      if (err) {
-        return
-      }
-      if (lastSeq !== body.last_seq) {
-        if (typeof (body.results) === 'object') {
-          body.results.forEach((item) => {
-            const status = item.doc.status
-            if ((status !== 'new') && (status !== 'processing')) {
-              evt.emit(item.id)
-            }
-          })
-        }
-      }
-      lastSeq = body.last_seq
-    }
-  )
-}
-
 // for parsing application/json
 app.use(bodyParser.json())
 
@@ -98,7 +75,7 @@ app.get('/dash/ui/*', function (req, res, next) {
 
 // list actions
 app.get('/dash/actions', (req, res) => {
-  actions.view('actions', 'all', handleResult(res))
+  actions.query('actions/all', handleResult(res))
 })
 
 // get info on an action
@@ -108,19 +85,19 @@ app.get('/dash/actions/:id', (req, res) => {
 
 // create a new action or update an existing action
 app.put('/dash/actions/:id', (req, res) => {
-  actions.insert(req.body, req.params.id, handleResult(res))
+  actions.put(req.body, req.params.id, handleResult(res))
 })
 
 // remove an action
 app.delete('/dash/actions/:id', function (req, res) {
-  actions.destroy(req.params.id, req.params.rev, handleResult(res))
+  actions.remove(req.params.id, req.params.rev, handleResult(res))
 })
 
 // the requests
 
 // list all requests
 app.get('/dash/requests', function (req, res) {
-  requests.view('requests', 'all', handleResult(res))
+  requests.query('requests/all', handleResult(res))
 })
 
 // get a specific request
@@ -136,7 +113,7 @@ app.get('/', function (req, res) {
 // handle requests for execution of an action
 app.get('/*', function (req, res) {
   // check if the action exists in the DB
-  actions.head(req.path, function (error, body, headers) {
+  actions.get(req.path, function (error, doc) {
     if (error) {
       res.status(404)
       return res.send('No such action')
@@ -155,11 +132,28 @@ app.get('/*', function (req, res) {
       handler = handleSync(res)
     }
 
-    requests.insert(record, handler)
+    requests.post(record, handler)
   })
 })
 
-setInterval(handleRequestsChanges, changeInterval)
+// setup handling of changes to the requests database to facilitate sync requests
+function waitForChanges () {
+  console.log('started waiting for changes')
+  requests.changes({
+    filter: 'requests/iscompleted',
+    live: true
+  }).on('change', function (change) {
+    evt.emit(change.id)
+  }).on('error', function () {
+    console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
+    setTimeout(function () {
+      waitForChanges()
+    }, retryMs)
+  })
+}
+
+// start the show
+waitForChanges()
 
 app.listen(ApiPort, function () {
   console.log('Api server listening on port', ApiPort)

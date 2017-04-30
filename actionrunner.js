@@ -1,14 +1,17 @@
 const DbUrl = process.env.DB_URL || 'http://localhost:5984'
 const {VM} = require('vm2')
 
-const nano = require('nano')(DbUrl),
-  actions = nano.use('actions'),
-  requests = nano.use('requests')
+const PouchDB = require('pouchdb-node')
+const actions = new PouchDB(`${DbUrl}/actions`)
+const requests = new PouchDB(`${DbUrl}/requests`)
+
+const retryMs = 500 // time in ms to wait before trying to resubscribe to the change feed
+const vmTimeOutMs = 1000 // maximum runtime of a VM in ms
 
 function processAction (action, request) {
   console.log('processing', request._id)
   const vm = new VM({
-    timeout: 1000,
+    timeout: vmTimeOutMs,
     sandbox: {}
   })
   try {
@@ -23,28 +26,28 @@ function processAction (action, request) {
     request.result = vm.run(script)
 
     request.status = 'success'
-  } catch(err) {
+  } catch (err) {
     request.status = 'failed'
     request.error = err.message
   }
   // and update the repository
-  requests.insert(request)
+  requests.put(request)
 }
 
 // return a handler which will process action and request
 function getActionHandler (request) {
-  return function (err, action) {
+  return function (_, action) {
     processAction(action, request)
   }
 }
 
 // process the request
 function processRequest (err, request) {
-  if (! err) {
+  if (!err) {
     request.status = 'processing'
     // update the request status to ensure we are the only one processing this request
-    requests.insert(request, (err2, body) => {
-      if (! err2) {
+    requests.put(request, (err2, body) => {
+      if (!err2) {
         // update the request rev so we can update the request later on
         request._rev = body.rev
         console.log('starting', request._id)
@@ -54,21 +57,22 @@ function processRequest (err, request) {
   }
 }
 
-// fetch a request from queue
-function processQueue () {
-  requests.view('requests', 'new', { limit: 1 }, (err, body) => {
-    if (! err) {
-      if (body.total_rows > 0) {
-        console.log('trying to start', body.rows[0].id)
-        requests.get(body.rows[0].id, processRequest)
-      }
-    }
+// watch the queue for new records and process them
+function waitForChanges () {
+  console.log('started waiting for changes')
+  requests.changes({
+    filter: 'requests/isnew',
+    live: true
+  }).on('change', function (change) {
+    console.log('trying to start', change.id)
+    requests.get(change.id, processRequest)
+  }).on('error', function () {
+    console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
+    setTimeout(function () {
+      waitForChanges()
+    }, retryMs)
   })
 }
 
-function startProcessing () {
-  const timer = setInterval(processQueue, 500)
-  return timer
-}
-
-startProcessing()
+// start the show
+waitForChanges()
