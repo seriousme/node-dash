@@ -49,3 +49,5 @@ Temporary Items
 # project specific
 node_modules
 pouchdb
+config.json
+log.txt
