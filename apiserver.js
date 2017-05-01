@@ -138,14 +138,15 @@ app.get('/*', function (req, res) {
 
 // setup handling of changes to the requests database to facilitate sync requests
 function waitForChanges () {
-  console.log('started waiting for changes')
   requests.changes({
     filter: 'requests/iscompleted',
     live: true
   }).on('change', function (change) {
     evt.emit(change.id)
   }).on('error', function () {
-    console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
+    }
     setTimeout(function () {
       waitForChanges()
     }, retryMs)
@@ -158,3 +159,6 @@ waitForChanges()
 app.listen(ApiPort, function () {
   console.log('Api server listening on port', ApiPort)
 })
+
+// to facilitate testing
+module.exports = app
