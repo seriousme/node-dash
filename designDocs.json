@@ -1,0 +1,25 @@
+{
+    "actions": [{
+        "views": {
+            "all": {
+                "map": "function (doc) {\n    emit(null,{'_id':doc._id,'_rev':doc._rev});\n}\n"
+            }
+        },
+        "_id": "_design/actions"
+    }],
+    "requests": [{
+        "views": {
+            "all": {
+                "map": "function (doc) {\n  emit(doc.timestamp,{'id':doc._id, 'path':doc.path, 'status':doc.status,'timestamp':doc.timestamp});\n}"
+            },
+            "new": {
+                "map": "function (doc) {\n if (doc.status == \"new\"){\n  emit(doc._id, 1);\n }\n}"
+            }
+        },
+        "filters": {
+            "iscompleted": "function (doc) {\n return ((doc.status === \"success\") || (doc.status === \"failed\"));}",
+            "isnew": "function (doc) {\n return (doc.status === \"new\");}"
+        },
+        "_id": "_design/requests"
+    }]
+}
