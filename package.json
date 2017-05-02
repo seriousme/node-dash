@@ -19,7 +19,7 @@
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "pouchdb-node": "^6.2.0",
-    "pouchdb-server": "^1.2.1",
+    "pouchdb-server": "^2.3.6",
     "vm2": "^3.4.6"
   },
   "devDependencies": {
@@ -32,7 +32,7 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.3.0",
-    "npm-run-all": "^2.3.0",
+    "npm-run-all": "^4.0.2",
     "nyc": "^10.3.0"
   },
   "repository": {
