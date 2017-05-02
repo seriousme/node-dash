@@ -1,6 +1,7 @@
 # node-dash
-
+[![Build Status](https://travis-ci.org/seriousme/node-dash.svg?branch=master)](https://travis-ci.org/seriousme/node-dash)
 [![Greenkeeper badge](https://badges.greenkeeper.io/seriousme/node-dash.svg)](https://greenkeeper.io/)
+
 An experiment to build a serverless setup using node.js.
 
 ![Node-dash design](https://rawgit.com/seriousme/node-dash/master/node-dash.v2.svg)
