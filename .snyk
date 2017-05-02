@@ -1,0 +1,9 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.7.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'npm:concat-stream:20160901':
+    - pouchdb-server > express-pouchdb > pouchdb-auth > base64url > concat-stream:
+        reason: None given
+        expires: '2017-06-01T21:22:32.135Z'
+patch: {}
