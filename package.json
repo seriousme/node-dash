@@ -4,7 +4,7 @@
   "description": "Serverless system",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 10000",
+    "test": "nyc --reporter=html --reporter=text mocha --timeout 10000",
     "startdb": "pouchdb-server -d pouchdb",
     "createdb": "node createdb",
     "actionrunner": "node actionrunner",
@@ -25,7 +25,8 @@
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
     "mocha": "^3.3.0",
-    "npm-run-all": "^2.3.0"
+    "npm-run-all": "^2.3.0",
+    "nyc": "^10.3.0"
   },
   "repository": {
     "type": "git",

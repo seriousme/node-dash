@@ -51,3 +51,5 @@ node_modules
 pouchdb
 config.json
 log.txt
+coverage
+.nyc_output
