@@ -4,19 +4,19 @@ const PouchDB = require('pouchdb-node')
 const designDocs = require('../designDocs.json')
 
 // Require the dev dependencies
-let chai = require('chai')
-let chaiHttp = require('chai-http')
-let server = require('../apiserver')
-let should = chai.should()
-let testAction = {
+const chai = require('chai')
+const chaiHttp = require('chai-http')
+const server = require('../apiserver')
+const should = chai.should()
+const testAction = {
   _id: '/myactions/sum',
   code: 'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
 }
-let brokenAction = {
+const brokenAction = {
   _id: '/myactions/brokenAction',
   code: 'unction main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
 }
-let testRequest = {
+const testRequest = {
   '_id': '41de62f1-ab4d-44a4-9a30-b25091e320fb',
   'path': '/myactions/sum',
   'timestamp': '2017-05-01T11:49:54.866Z',
