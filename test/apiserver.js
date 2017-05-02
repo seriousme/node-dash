@@ -8,80 +8,184 @@ let chai = require('chai')
 let chaiHttp = require('chai-http')
 let server = require('../apiserver')
 let should = chai.should()
+let testAction = {
+  _id: '/myactions/sum',
+  code: 'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
+}
+let brokenAction = {
+  _id: '/myactions/brokenAction',
+  code: 'unction main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
+}
+let testRequest = {
+  '_id': '41de62f1-ab4d-44a4-9a30-b25091e320fb',
+  'path': '/myactions/sum',
+  'timestamp': '2017-05-01T11:49:54.866Z',
+  'params': {
+    'a': 1,
+    'b': 2
+  },
+  'result': {
+    'sum': '3'
+  },
+  'status': 'success'
+}
+
 var actions
+var requests
 
 chai.use(chaiHttp)
 
 console.log('Testing using database at', DbUrl)
 
+// Before each test we recreate the database(s)
 function recreateDB (dbname, callback) {
   const db = new PouchDB(`${DbUrl}/${dbname}`)
   db.destroy((_) => {
     const newdb = new PouchDB(`${DbUrl}/${dbname}`)
-    callback(newdb)
+    if (designDocs[dbname]){
+      newdb.bulkDocs(designDocs[dbname], () => {
+        callback(newdb)
+      })
+    } else {
+      callback(newdb)
+    }
   })
 }
 
-describe('Actions', () => {
-  beforeEach((done) => { // Before each test we empty the database
-    recreateDB('actions', (newActions) => {
-      actions = newActions
-      // and load it op with the design doc
-      actions.bulkDocs(designDocs.actions, () => {
-        // and a demo action
-        // actions.put({
-        //   '_id': '/myactions/sum',
-        //   'code': 'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
-        // }, () => {
-        //   done()
-        // })
+describe('APIserver', () => {
+  describe('Actions', () => {
+    beforeEach((done) => {
+      recreateDB('actions', (newActions) => {
+        actions = newActions
         done()
       })
     })
-  })
-/*
-  * Test the /GET route
-  */
-  describe('GET /dash/actions', () => {
-      it('it should GET all the actions', (done) => {
-        chai.request(server)
-            .get('/dash/actions')
-            .end((_, res) => {
+   /*
+    * Test the /GET routes
+    */
+    describe('GET /dash/actions', () => {
+        it('it should GET all the actions', (done) => {
+          chai.request(server)
+              .get('/dash/actions')
+              .end((_, res) => {
+                  res.should.have.status(200)
+                  res.body.should.be.a('object')
+                  res.body.rows.should.be.a('array')
+                  res.body.rows.length.should.be.eql(0)
+                done()
+              })
+        })
+    })
+    describe('GET /dash/actions/:id', () => {
+        it('it should GET an action by ID', (done) => {
+          actions.put(testAction, () => {
+            chai.request(server)
+              .get('/dash/actions/' + encodeURIComponent(testAction._id))
+              .end((_, res) => {
                 res.should.have.status(200)
                 res.body.should.be.a('object')
-                res.body.rows.should.be.a('array')
-                res.body.rows.length.should.be.eql(0)
-              done()
-            })
-      })
-  })
-  describe('GET /dash/actions/:id', () => {
-      it('it should GET an action by ID', (done) => {
-        const id = '/myactions/sum'
-        const code = 'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
-        actions.put({
-          '_id': id,
-          'code': code
-        }, () => {
+                res.body.should.contain(testAction)
+                res.body.should.have.property('_rev')
+                done()
+              })
+          })
+        })
+        it('it should give a 404 on a GET with an invalid ID', (done) => {
+          const id = '/blabla'
           chai.request(server)
             .get('/dash/actions/' + encodeURIComponent(id))
             .end((_, res) => {
-                res.should.have.status(200)
-                res.body.should.be.a('object')
-                res.body._id.should.be.eql(id)
-                res.body.code.should.be.eql(code)
+              res.should.have.status(404)
               done()
             })
         })
+    })
+    // describe('PUT /dash/actions/:id', () => {})
+    // describe('DELETE /dash/actions/:id', () => {})
+  })
+  describe('Requests', () => {
+    beforeEach((done) => {
+      recreateDB('actions', (newActions) => {
+        actions = newActions
+        recreateDB('requests', (newRequests) => {
+          requests = newRequests
+          done()
+        })
       })
-      it('it should give a 404 on a GET with an invalid ID', (done) => {
-        const id = '/blabla'
-        chai.request(server)
-          .get('/dash/actions/' + encodeURIComponent(id))
-          .end((_, res) => {
+    })
+    describe('GET /dash/requests/', () => {
+        it('it should GET all requests', (done) => {
+          chai.request(server)
+            .get('/dash/requests/')
+            .end((_, res) => {
+              res.should.have.status(200)
+              res.body.should.be.a('object')
+              res.body.rows.should.be.a('array')
+              res.body.rows.length.should.eql(0)
+              done()
+            })
+        })
+    })
+    describe('GET /dash/requests/:id', () => {
+        it('it should GET a requests by ID', (done) => {
+          requests.put(testRequest, () => {
+            chai.request(server)
+              .get('/dash/requests/' + testRequest._id)
+              .end((_, res) => {
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+                // this will only work using chai 4.x
+                // res.body.should.deep.include(testRequest)
+                // for now we specify properties individually
+                res.body._id.should.eql(testRequest._id)
+                res.body.path.should.eql(testRequest.path)
+                res.body.timestamp.should.eql(testRequest.timestamp)
+                res.body.params.should.eql(testRequest.params)
+                res.body.result.should.eql(testRequest.result)
+                res.body.status.should.eql(testRequest.status)
+                res.body.should.have.property('_rev')
+                done()
+              })
+            })
+        })
+        it('it should give a 404 on a GET with an invalid ID', (done) => {
+            chai.request(server)
+            .get('/dash/requests/blabla')
+            .end((_, res) => {
               res.should.have.status(404)
+              done()
+            })
+        })
+    })
+    describe('GET <action>', () => {
+      it('it should give a 404 on a GET with an non-existent action', (done) => {
+          chai.request(server)
+          .get('/myactions/blabla')
+          .end((_, res) => {
+            res.should.have.status(404)
             done()
           })
       })
+      it('it should create a async request', (done) => {
+          actions.put(testAction, () => {
+            chai.request(server)
+            .get(testAction._id)
+            .end((_, res) => {
+              res.should.have.status(201)
+              done()
+            })
+          })
+      })
+      it('it should timeout on a sync request', (done) => {
+        actions.put(testAction, () => {
+          chai.request(server)
+          .get(testAction._id + '?sync=true')
+          .end((_, res) => {
+            res.should.have.status(504)
+            done()
+          })
+        })
+      })
+    })
   })
 })
