@@ -1,0 +1,6 @@
+node_modules
+pouchdb
+log.txt
+config.json
+npm-debug.log
+coverage
