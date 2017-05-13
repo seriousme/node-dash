@@ -7,7 +7,7 @@
     "pretest": "eslint *.js",
     "test": "nyc --reporter=html --reporter=text mocha --timeout 10000",
     "startdb": "pouchdb-server -d pouchdb",
-    "createdb": "node createdb",
+    "createdb": "node createDB",
     "actionrunner": "node actionrunner",
     "apiserver": "node apiserver",
     "start": "run-p startdb createdb actionrunner apiserver",
