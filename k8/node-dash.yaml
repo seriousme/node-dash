@@ -1,0 +1,125 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: actionrunner
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        svc: actionrunner
+    spec:
+      containers:
+      - command:
+        - /usr/bin/node
+        - /usr/src/app/actionrunner.js
+        env:
+        - name: DB_URL
+          value: http://pouchdb:5984/
+        image: seriousme/node-dash
+        name: actionrunner
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    svc: actionrunner
+  name: actionrunner
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    svc: actionrunner
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: apiserver
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        svc: apiserver
+    spec:
+      containers:
+      - command:
+        - /usr/bin/node
+        - /usr/src/app/apiserver.js
+        env:
+        - name: DB_URL
+          value: http://pouchdb:5984/
+        image: seriousme/node-dash
+        name: apiserver
+        ports:
+        - containerPort: 8080
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    svc: apiserver
+  name: apiserver
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  selector:
+    svc: apiserver
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: pouchdb
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        svc: pouchdb
+    spec:
+      containers:
+      - command:
+        - /bin/sh
+        - /usr/src/app/docker/startdb.sh
+        image: seriousme/node-dash
+        name: pouchdb
+        ports:
+        - containerPort: 5984
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    svc: pouchdb
+  name: pouchdb
+spec:
+  ports:
+  - name: "5984"
+    port: 5984
+    targetPort: 5984
+  selector:
+    svc: pouchdb

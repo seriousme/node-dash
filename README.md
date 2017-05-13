@@ -6,15 +6,17 @@ An experiment to build a serverless setup using node.js.
 
 ![Node-dash design](https://rawgit.com/seriousme/node-dash/master/node-dash.v2.svg)
 
-The repository and queue are implemented using [Pouchdb](https://pouchdb.com/), but Couchdb (http://couchdb.apache.org/) will work as well.
+The repository and queue are implemented using [Pouchdb](https://pouchdb.com/), but
+[Couchdb](http://couchdb.apache.org/) will work as well.
 
 ## Installation
-There are 3 options to get this running:
+There are 4 options to get this running:
 - `git clone` this repository and run `npm install` followed by `npm start`
 - `docker run -d -p 8080:8080 seriousme/node-dash`
 - use the `docker-compose` file in the docker folder
+- use `kubectl create -f https://github.com/seriousme/node-dash/k8/node-dash.yaml` to create a deployment on a [Kubernetes](https://kubernetes.io/) Installation.
 
-Once it runs you can send your browser to http://\<your host\>:8080/ which will show you a web interface.
+Once it runs you can send your browser to http://\<your host\>:8080/ which will show you a web interface, on Kubernetes `kubectl describe service apiserver` will show the IP/port.
 Alternatively you can use any REST client (e.g. CURL/Postman/etc) to talk to the API server
 
 ## REST endpoints
