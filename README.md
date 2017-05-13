@@ -14,7 +14,7 @@ There are 4 options to get this running:
 - `git clone` this repository and run `npm install` followed by `npm start`
 - `docker run -d -p 8080:8080 seriousme/node-dash`
 - use the `docker-compose` file in the docker folder
-- use `kubectl create -f https://github.com/seriousme/node-dash/k8/node-dash.yaml` to create a deployment on a [Kubernetes](https://kubernetes.io/) Installation.
+- use `kubectl create -f https://raw.githubusercontent.com/seriousme/node-dash/master/k8/node-dash.yaml` to create a deployment on a [Kubernetes](https://kubernetes.io/) Installation.
 
 Once it runs you can send your browser to http://\<your host\>:8080/ which will show you a web interface, on Kubernetes `kubectl describe service apiserver` will show the IP/port.
 Alternatively you can use any REST client (e.g. CURL/Postman/etc) to talk to the API server
