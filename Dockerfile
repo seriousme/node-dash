@@ -17,6 +17,5 @@ RUN chown nodejs /usr/src/app/db
 
 EXPOSE 8080
 EXPOSE 5984
-# openshift needs a numeric UID
 USER nodejs
 ENTRYPOINT ["/bin/sh","/usr/src/app/docker/startup.sh"]
