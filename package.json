@@ -33,7 +33,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.3.0",
     "npm-run-all": "^4.0.2",
-    "nyc": "^10.3.0"
+    "nyc": "^10.3.2"
   },
   "repository": {
     "type": "git",
