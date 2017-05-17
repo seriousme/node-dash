@@ -142,6 +142,7 @@ var app = new Vue({
         'params': JSON.parse(request.params)
       }).then(function (response) {
         doNotify('info', 'Succesfully created request with ID: ' + response.body.id);
+        page.show('/requests');
       }, function (response) {
         // error callback
         doNotify('danger', 'Failed to create new request');
