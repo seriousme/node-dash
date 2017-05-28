@@ -23,7 +23,7 @@
     "vm2": "^3.4.6"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.0.0",
     "chai-http": "^3.0.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
