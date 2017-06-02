@@ -55,7 +55,7 @@ const demoData = {
 // try to empty the DB, if the DB is not present try again after some time
 function destroyDB (dbname, callback) {
   const db = new PouchDB(`${DbUrl}/${dbname}`)
-  db.destroy(function (err, _) {
+  db.destroy((err, _) => {
     if (err) {
       if (typeof (tries[dbname]) === 'undefined') {
         tries[dbname] = 0
@@ -74,9 +74,9 @@ function destroyDB (dbname, callback) {
 
 function doInsert (dbname, data) {
   // clean up the database we migh have created previously
-  destroyDB(dbname, function () {
+  destroyDB(dbname, () => {
     const db = new PouchDB(`${DbUrl}/${dbname}`)
-    db.bulkDocs(data, function (err, response) {
+    db.bulkDocs(data, (err, response) => {
       if (err) {
         console.log(err, response)
       } else {
