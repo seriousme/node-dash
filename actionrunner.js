@@ -34,27 +34,22 @@ function processAction (action, request) {
   requests.put(request)
 }
 
-// return a handler which will process action and request
-function getActionHandler (request) {
-  return function (_, action) {
-    processAction(action, request)
-  }
-}
-
 // process the request
-function processRequest (err, request) {
-  if (!err) {
-    request.status = 'processing'
-    // update the request status to ensure we are the only one processing this request
-    requests.put(request, (err2, body) => {
-      if (!err2) {
-        // update the request rev so we can update the request later on
-        request._rev = body.rev
-        console.log('starting', request._id)
-        actions.get(request.path, getActionHandler(request))
-      }
-    })
-  }
+function processRequest (request) {
+  request.status = 'processing'
+  // update the request status to ensure we are the only one processing this request
+  requests.put(request, (err, body) => {
+    if (!err) {
+      // update the request rev so we can update the request later on
+      request._rev = body.rev
+      console.log('starting', request._id)
+      actions.get(request.path, (err2, action) => {
+        if (!err2) {
+          processAction(action, request)
+        }
+      })
+    }
+  })
 }
 
 // watch the queue for new records and process them
@@ -63,12 +58,16 @@ function waitForChanges () {
   requests.changes({
     filter: 'requests/isnew',
     live: true
-  }).on('change', function (change) {
+  }).on('change', change => {
     console.log('trying to start', change.id)
-    requests.get(change.id, processRequest)
-  }).on('error', function () {
+    requests.get(change.id, (err, request) => {
+      if (!err) {
+        processRequest(request)
+      }
+    })
+  }).on('error', () => {
     console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
-    setTimeout(function () {
+    setTimeout(() => {
       waitForChanges()
     }, retryMs)
   })
