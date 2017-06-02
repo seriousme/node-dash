@@ -15,9 +15,8 @@ const app = express()
 const maxTime = 2000 // time in ms before timing out sync requests
 const retryMs = 500  // time in ms to wait before trying to resubscribe to the change feed
 
-function handleResult (res, status) {
-  var statusCode = status || 200
-  return function (err, body) {
+function handleResult (res, statusCode = 200) {
+  return (err, body) => {
     if (err) {
       res.status(err.status)
       return res.send(err.message)
@@ -35,7 +34,7 @@ function handleAsync (res) {
 function returnSyncResult (res, id, type) {
   if (type === 'timeout') {
     res.status(504) // timeout
-    return res.send('request ' + id + ' timed out')
+    return res.send(`request ${id} timed out`)
   }
   // return result
   requests.get(id, handleResult(res))
@@ -43,7 +42,7 @@ function returnSyncResult (res, id, type) {
 
 // for synchronous requests we need to return the result of the action
 function handleSync (res) {
-  return function (error, body) {
+  return (error, body) => {
     if (error) {
       res.status(error.statusCode)
       return res.send(error.message)
@@ -67,7 +66,7 @@ app.use(bodyParser.json())
 
 app.use('/dash/ui', express.static(staticDir))
 
-app.get('/dash/ui/*', function (req, res, next) {
+app.get('/dash/ui/*', (req, res, next) => {
   res.sendFile(join(__dirname, staticDir, '/index.html'))
 })
 
@@ -89,31 +88,31 @@ app.put('/dash/actions/:id', (req, res) => {
 })
 
 // remove an action
-app.delete('/dash/actions/:id', function (req, res) {
+app.delete('/dash/actions/:id', (req, res) => {
   actions.remove(req.params.id, req.params.rev, handleResult(res))
 })
 
 // the requests
 
 // list all requests
-app.get('/dash/requests', function (req, res) {
+app.get('/dash/requests', (req, res) => {
   requests.query('requests/all', handleResult(res))
 })
 
 // get a specific request
-app.get('/dash/requests/:requestid', function (req, res) {
+app.get('/dash/requests/:requestid', (req, res) => {
   requests.get(req.params.requestid, handleResult(res))
 })
 
 // root path
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   res.redirect('/dash/ui')
 })
 
 // handle requests for execution of an action
-app.get('/*', function (req, res) {
+app.get('/*', (req, res) => {
   // check if the action exists in the DB
-  actions.get(req.path, function (error, doc) {
+  actions.get(req.path, (error, doc) => {
     if (error) {
       res.status(404)
       return res.send('No such action')
@@ -141,13 +140,13 @@ function waitForChanges () {
   requests.changes({
     filter: 'requests/iscompleted',
     live: true
-  }).on('change', function (change) {
+  }).on('change', change => {
     evt.emit(change.id)
-  }).on('error', function () {
+  }).on('error', () => {
     if (process.env.NODE_ENV !== 'test') {
       console.log('lost connection to database at', DbUrl, 'trying to reconnect in', retryMs, 'ms')
     }
-    setTimeout(function () {
+    setTimeout(() => {
       waitForChanges()
     }, retryMs)
   })
@@ -156,7 +155,7 @@ function waitForChanges () {
 // start the show
 waitForChanges()
 
-app.listen(ApiPort, function () {
+app.listen(ApiPort, () => {
   console.log('Api server listening on port', ApiPort)
 })
 
