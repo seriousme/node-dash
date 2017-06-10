@@ -4,6 +4,7 @@
   "description": "Serverless system",
   "main": "index.js",
   "scripts": {
+    "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check",
     "pretest": "eslint *.js",
     "test": "nyc --reporter=html --reporter=text mocha --timeout 10000",
     "startdb": "pouchdb-server -d pouchdb",
@@ -26,14 +27,13 @@
     "chai": "^4.0.0",
     "chai-http": "^3.0.0",
     "eslint": "^3.19.0",
-    "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-node": "^5.0.0",
-    "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-config-google": "^0.8.0",
+    "eslint-config-prettier": "^2.1.1",
+    "eslint-plugin-prettier": "^2.1.1",
     "mocha": "^3.4.0",
     "npm-run-all": "^4.0.2",
-    "nyc": "^11.0.1"
+    "nyc": "^11.0.1",
+    "prettier": "^1.4.4"
   },
   "repository": {
     "type": "git",
