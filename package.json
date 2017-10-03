@@ -30,7 +30,7 @@
     "eslint-config-google": "^0.9.1",
     "eslint-config-prettier": "^2.1.1",
     "eslint-plugin-prettier": "^2.1.1",
-    "mocha": "^3.4.0",
+    "mocha": "^4.0.0",
     "npm-run-all": "^4.0.2",
     "nyc": "^11.0.1",
     "prettier": "^1.4.4"
