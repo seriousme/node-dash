@@ -58,6 +58,27 @@ function recreateDB(dbname, callback) {
 after(() => server.close());
 
 describe("APIserver", () => {
+  describe("UI", () => {
+    it("it should get a redirect to the UI when asking for root", done => {
+      chai
+        .request(server)
+        .get("/")
+        .redirects(0)
+        .end((_, res) => {
+          res.should.redirect;
+          done();
+        });
+    });
+    it("it should get a static file", done => {
+      chai
+        .request(server)
+        .get("/dash/ui/index.htm")
+        .end((_, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+  });
   describe("Actions", () => {
     beforeEach(done => {
       recreateDB("actions", newActions => {
@@ -108,8 +129,38 @@ describe("APIserver", () => {
           });
       });
     });
-    // describe('PUT /dash/actions/:id', () => {})
-    // describe('DELETE /dash/actions/:id', () => {})
+    describe("PUT /dash/actions/:id", () => {
+      it("it should create an action", done => {
+        chai
+          .request(server)
+          .put("/dash/actions/" + encodeURIComponent(testAction._id))
+          .send(testAction)
+          .end((_, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+    });
+    describe("DELETE /dash/actions/:id", () => {
+      it("it should delete an action", done => {
+        actions.put(testAction, () => {
+          actions.get(testAction._id, (_, myAction) => {
+            chai
+              .request(server)
+              .delete(
+                "/dash/actions/" +
+                  encodeURIComponent(myAction._id) +
+                  "?rev=" +
+                  myAction._rev
+              )
+              .end((_, res) => {
+                res.should.have.status(200);
+                done();
+              });
+          });
+        });
+      });
+    });
   });
   describe("Requests", () => {
     beforeEach(done => {
