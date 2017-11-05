@@ -88,7 +88,8 @@ app.put("/dash/actions/:id", (req, res) => {
 
 // remove an action
 app.delete("/dash/actions/:id", (req, res) => {
-  actions.remove(req.params.id, req.params.rev, handleResult(res));
+  const rev = req.params.rev || req.query.rev;
+  actions.remove(req.params.id, rev, handleResult(res));
 });
 
 // the requests

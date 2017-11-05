@@ -172,14 +172,17 @@ var app = new Vue({
 
     deleteAction: function deleteAction(action) {
       var _this = this;
-
       if (
         confirm("Are you sure you want to delete action " + action._id + " ?")
       ) {
         this.$http
-          .delete(baseUrl + "actions/" + encodeURIComponent(action._id), {
-            _rev: action._rev
-          })
+          .delete(
+            baseUrl +
+              "actions/" +
+              encodeURIComponent(action._id) +
+              "?rev=" +
+              action._rev
+          )
           .then(
             function(response) {
               doNotify(
@@ -190,7 +193,7 @@ var app = new Vue({
             },
             function(response) {
               // error callback
-              doNotify("danger", "Failed to create new request");
+              doNotify("danger", "Failed to delete action");
             }
           );
         page.show("/actions");
