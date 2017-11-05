@@ -189,7 +189,7 @@ describe("APIserver", () => {
             });
         });
       });
-      it("it should timeout on a sync request", done => {
+      it("it should timeout on a sync request when no actionrunner is active", done => {
         actions.put(testAction, () => {
           chai
             .request(server)
