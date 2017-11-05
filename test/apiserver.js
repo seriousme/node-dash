@@ -52,6 +52,9 @@ function recreateDB (dbname, callback) {
   })
 }
 
+// after all the tests have run close the server to ensure mocha exits
+after(() => server.close());
+
 describe('APIserver', () => {
   describe('Actions', () => {
     beforeEach((done) => {
