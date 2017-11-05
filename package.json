@@ -6,7 +6,7 @@
   "scripts": {
     "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check",
     "pretest": "eslint *.js",
-    "test": "nyc --reporter=html --reporter=text mocha --timeout 10000",
+    "test": "nyc --reporter=html --reporter=text mocha --timeout 10000 --exit",
     "startdb": "pouchdb-server -d pouchdb",
     "createdb": "node createDB",
     "actionrunner": "node actionrunner",
