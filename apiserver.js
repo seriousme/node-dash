@@ -163,9 +163,9 @@ function waitForChanges() {
 // start the show
 waitForChanges();
 
-app.listen(ApiPort, () => {
+const server = app.listen(ApiPort, () => {
   console.log("Api server listening on port", ApiPort);
 });
 
 // to facilitate testing
-module.exports = app;
+module.exports = server;
