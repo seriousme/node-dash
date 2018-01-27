@@ -20,7 +20,7 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "pouchdb-node": "^6.3.4",
-    "pouchdb-server": "^2.3.7",
+    "pouchdb-server": "^4.0.0",
     "vm2": "^3.5.2"
   },
   "devDependencies": {
