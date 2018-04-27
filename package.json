@@ -12,7 +12,9 @@
     "actionrunner": "node actionrunner",
     "apiserver": "node apiserver",
     "start": "run-p startdb createdb actionrunner apiserver",
-    "start2": "run-p startdb actionrunner apiserver"
+    "start2": "run-p startdb actionrunner apiserver",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "Hans Klunder",
   "license": "Apache-2.0",
@@ -21,7 +23,8 @@
     "express": "^4.16.2",
     "pouchdb-node": "^6.4.2",
     "pouchdb-server": "^4.0.0",
-    "vm2": "^3.5.2"
+    "vm2": "^3.5.2",
+    "snyk": "^1.73.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -45,5 +48,6 @@
   "bugs": {
     "url": "https://github.com/seriousme/node-dash/issues"
   },
-  "homepage": "https://github.com/seriousme/node-dash#readme"
+  "homepage": "https://github.com/seriousme/node-dash#readme",
+  "snyk": true
 }
