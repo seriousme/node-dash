@@ -1,8 +1,5 @@
-cd /usr/src/app
+cd $HOME/app
 /bin/sh docker/startdb.sh &
-/usr/bin/node actionrunner.js & 
-/usr/bin/node apiserver.js &
+node actionrunner.js &
+node apiserver.js &
 wait
-
-
-

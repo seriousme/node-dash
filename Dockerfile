@@ -1,21 +1,18 @@
 # Dash on Alpine
 #
-# VERSION 0.2.0
+# VERSION 0.3.0
 
-FROM mhart/alpine-node:6
+FROM node:8
 MAINTAINER Hans Klunder <hans.klunder@bigfoot.com>
+RUN mkdir -p /home/node/app/db
 
-RUN mkdir -p /usr/src/app/db
-RUN adduser -S -s /sbin/nologin -g "NodeJS" -u 200 nodejs
-
-WORKDIR /usr/src/app/
-
-COPY ./ /usr/src/app/
+WORKDIR /home/node/app/
+COPY ./ /home/node/app/
 
 RUN npm install --production
-RUN chown nodejs /usr/src/app/db
+RUN chown node /home/node/app/db
 
 EXPOSE 8080
 EXPOSE 5984
-USER nodejs
-ENTRYPOINT ["/bin/sh","/usr/src/app/docker/startup.sh"]
+USER node
+ENTRYPOINT ["/bin/sh","/home/node/app/docker/startup.sh"]

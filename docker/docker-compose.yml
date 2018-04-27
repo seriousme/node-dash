@@ -11,18 +11,18 @@ services:
      - DB_URL=http://pouchdb:5984/
     links:
      - pouchdb
-    entrypoint: /usr/bin/node /usr/src/app/actionrunner.js 
+    entrypoint: node /home/node/app/actionrunner.js
   apiserver:
     image: seriousme/node-dash
-    environment: 
+    environment:
      - DB_URL=http://pouchdb:5984/
     ports:
      - "8080:8080"
     links:
      - pouchdb
-    entrypoint: /usr/bin/node /usr/src/app/apiserver.js 
+    entrypoint: node /home/node/app/apiserver.js
   pouchdb:
     image: seriousme/node-dash
-    ports: 
+    ports:
     - "5984:5984"
-    entrypoint: /bin/sh /usr/src/app/docker/startdb.sh
+    entrypoint: /bin/sh /home/node/app/docker/startdb.sh
