@@ -12,7 +12,7 @@ function processAction(action, request) {
   console.log("processing", request._id);
   const vm = new VM({
     timeout: vmTimeOutMs,
-    sandbox: {}
+    sandbox: {},
   });
   try {
     // execute the action
@@ -58,9 +58,9 @@ function waitForChanges() {
   requests
     .changes({
       filter: "requests/isnew",
-      live: true
+      live: true,
     })
-    .on("change", change => {
+    .on("change", (change) => {
       console.log("trying to start", change.id);
       requests.get(change.id, (err, request) => {
         if (!err) {

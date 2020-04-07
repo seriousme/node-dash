@@ -48,7 +48,7 @@ function handleSync(res) {
       return res.send(error.message);
     }
     // wait for an event to pickup the result from the queue and return it to the requester
-    evt.once(body.id, type => {
+    evt.once(body.id, (type) => {
       returnSyncResult(res, body.id, type);
     });
     // if it takes longer than maxTime, return a timeout
@@ -122,7 +122,7 @@ app.get("/*", (req, res) => {
       timestamp: new Date().toISOString(),
       path: req.path,
       status: "new",
-      params: req.query
+      params: req.query,
     };
 
     var handler = handleAsync(res);
@@ -140,9 +140,9 @@ function waitForChanges() {
   requests
     .changes({
       filter: "requests/iscompleted",
-      live: true
+      live: true,
     })
-    .on("change", change => {
+    .on("change", (change) => {
       evt.emit(change.id);
     })
     .on("error", () => {

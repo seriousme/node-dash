@@ -14,13 +14,13 @@ const demoData = {
     {
       _id: "/myactions/sum",
       code:
-        'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}'
+        'function main(params){ return { "sum": Number(params.a) + Number(params.b)};}',
     },
     {
       _id: "/myactions/mult",
       code:
-        'function main(params){ return { "mult":Number(params.a) * Number(params.b)};}'
-    }
+        'function main(params){ return { "mult":Number(params.a) * Number(params.b)};}',
+    },
   ],
   requests: [
     {
@@ -28,32 +28,32 @@ const demoData = {
       timestamp: new Date(now - 8000000).toISOString(),
       params: {
         a: 1,
-        b: 2
+        b: 2,
       },
       result: {
-        sum: "3"
+        sum: "3",
       },
-      status: "success"
+      status: "success",
     },
     {
       path: "/myactions/sum",
       timestamp: new Date(now - 320000).toISOString(),
       params: {
         a: 1,
-        b: 2
+        b: 2,
       },
-      status: "new"
+      status: "new",
     },
     {
       path: "/myactions/mult",
       timestamp: new Date(now - 140000).toISOString(),
       params: {
         a: 1,
-        b: 2
+        b: 2,
       },
-      status: "new"
-    }
-  ]
+      status: "new",
+    },
+  ],
 };
 
 // try to empty the DB, if the DB is not present try again after some time
